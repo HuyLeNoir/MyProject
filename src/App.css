@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=K2D:ital,wght@0,200;0,400;0,600;1,200;1,400;1,600&display=swap');
+@import "tailwindcss";
+@plugin "flowbite-react/plugin/tailwindcss";
+@source "../.flowbite-react/class-list.json";
+
+@theme {
+    --font-K2D: "K2D";
+    --text-smaller: 11.1px;
+    --text-small: 13.3px;
+    --text-p: 16px;
+    --text-h6: 19.2px;
+    --text-h5: 23px;
+    --text-h4: 27.6px;
+    --text-h3: 33.2px;
+    --text-h2: 39.8px;
+    --text-h1: 47.8px;
+    --text-title: 64px;
+    --color-textColor1: #1E1E1E;
+    --color-textColor2: #4D4D4D;
+    --color-textColor3: #808080;
+    --color-buttonColor: #D8E1F3;
+    --color-backgroundColor: #FAFAFA;
+    --color-secondaryColor: #EFEFEF;
+    --color-primaryColor: #30569E;
+    --color-successColor: #8FFEAD;
+    --color-warningColor: #FCA0A1;
+}
+
+@layer components{
+    .naviButton{
+        @apply p-2 cursor-pointer text-h6 text-textColor1
+    }
+    .pageButton{
+        @apply flex justify-center items-center cursor-pointer rounded-full w-9 h-9 hover:bg-secondaryColor transition-colors duration-300 ease-initial
+    }
+}
