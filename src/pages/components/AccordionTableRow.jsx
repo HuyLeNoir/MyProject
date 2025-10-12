@@ -1,4 +1,5 @@
 import { HiChevronDown } from "react-icons/hi";
+import LabeledText from "./LabeledText";
 function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
     return (
         <>
@@ -26,9 +27,7 @@ function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
                 <td className="text-center px-4 py-2">{row[fields[5]]}</td>
             </tr>
             <tr key={row[fields[0]] + "detailed"}>
-                <td colSpan="5">
-                    {children}
-                </td>
+                <td colSpan="5">{children}</td>
             </tr>
         </>
     );
@@ -36,6 +35,64 @@ function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
 
 //TODO: normalize accordion row : checked
 export default function AccordionTableRow({ isOpen, handleRowOpening, row, fields, index }) {
+    //Kiem tra fields[0] (maDeTai/maBaiBao dung lam key de phan biet cac loai bang voi nhau => tu do render cac kieu bang khac nhau)
+    const renderDeTai = () => (
+        <div
+            className={`${
+                isOpen ? "max-h-120" : "max-h-0"
+            } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
+        >
+            <span>
+                <span className="text-K2D text-primaryColor">Tóm tắt:</span> {row.tomTat}
+            </span>
+            <span className="text-K2D text-primaryColor">
+                Giảng viên hướng dẫn: <span className="text-textColor1">{row.GVHD}</span>
+            </span>
+            <div className="flex flex-col">
+                <span className="text-K2D text-primaryColor">Các thành viên tham gia:</span>
+                <ol className="list-decimal list-inside p-2 flex flex-col">
+                    {row.members.map((member, index) => (
+                        <li key={member + " " + index}>{member}</li>
+                    ))}
+                </ol>
+            </div>
+        </div>
+    );
+    const renderBaiBao = () => (
+        <div
+            className={`${
+                isOpen ? "max-h-1000" : "max-h-0"
+            } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
+        >
+            <LabeledText label="Tóm tắt">{row.tomTat}</LabeledText>
+            <LabeledText label="Keywords">{row.keywords}</LabeledText>
+            <LabeledText label="Email liên hệ">{row.emailLienHe}</LabeledText>
+            {row.loaiBaiBao === "Tạp chí khoa học" ? (
+                <LabeledText label="Đăng trên tạp chí">{row.tenTapChi}</LabeledText>
+            ) : (
+                <LabeledText label="Công bố tại hội thảo">{row.tenHoiThao}</LabeledText>
+            )}
+            <LabeledText label="DOI">{row.DOI}</LabeledText>
+            <LabeledText label="Trích dẫn">{row.trichDan}</LabeledText>
+            <div className="flex flex-col">
+                <span className="text-K2D text-primaryColor">Các nguồn tham khảo:</span>
+                <ol className="list-decimal list-inside p-2 flex flex-col">
+                    {row.nguonThamKhao.map((nguon, index) => (
+                        <li key={nguon + " " + index}>{nguon}</li>
+                    ))}
+                </ol>
+            </div>
+            <div className="flex flex-col">
+                <span className="text-K2D text-primaryColor">Các đề tài nghiên cứu khoa học có liên quan:</span>
+                <ol className="list-decimal list-inside p-2 flex flex-col">
+                    {row.cacDeTaiLienQuan.map((detai, index) => (
+                        <li key={detai + " " + index}>{detai}</li>
+                    ))}
+                </ol>
+            </div>
+            {/* TODO: chuyen nguon tham khao thanh accordion */}
+        </div>
+    );
     return (
         <>
             <TRow
@@ -46,26 +103,7 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
                 handleRowOpening={handleRowOpening}
             >
                 {/* children: just make a div containing detailed information :> */}
-                <div
-                    className={`${
-                        isOpen ? "max-h-120" : "max-h-0"
-                    } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
-                >
-                    <span>
-                        <span className="text-K2D text-primaryColor">Tóm tắt:</span> {row.tomTat}
-                    </span>
-                    <span className="text-K2D text-primaryColor">
-                        Giảng viên hướng dẫn: <span className="text-textColor1">{row.GVHD}</span>
-                    </span>
-                    <div className="flex flex-col">
-                        <span className="text-K2D text-primaryColor">Các thành viên tham gia:</span>
-                        <ol className="list-decimal list-inside p-2 flex flex-col">
-                            {row.members.map((member, index) => (
-                                <li key={member + " " + index}>{member}</li>
-                            ))}
-                        </ol>
-                    </div>
-                </div>
+                {fields[0] === "maBaiBao" ? renderBaiBao() : renderDeTai()}
             </TRow>
         </>
     );
