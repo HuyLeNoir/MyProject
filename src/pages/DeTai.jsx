@@ -204,11 +204,11 @@ function TableDeTai() {
     function handleFilters() {
         let data = DATA.filter(
             (item) =>
-                (giangVienHD.Name === "" || item.GVHD === giangVienHD.Name) &&
+                (giangVienHD.Name === "" || item.GVHD.toLowerCase() === giangVienHD.Name.toLowerCase()) &&
                 (linhVuc === "" || item.linhVuc === linhVuc) &&
                 (searchValue.trim() === "" ||
-                    item.tomTat.includes(searchValue.trim()) ||
-                    item.members.toString().includes(searchValue.trim())) &&
+                    item.tomTat.toLowerCase().includes(searchValue.trim()) ||
+                    item.members.toString().toLowerCase().includes(searchValue.trim())) &&
                 (capDeTai === "" || item.capDeTai === "Đề tài cấp " + capDeTai) &&
                 (namBD === "" || Number(item.ngayThucHien.split("/")[2]) >= Number(namBD)) &&
                 (namKT === "" || Number(item.ngayThucHien.split("/")[2]) <= Number(namKT))
@@ -270,8 +270,8 @@ function TableDeTai() {
                     <InputGiangVien
                         fieldName={"Giảng Viên Hướng Dẫn"}
                         users={danhSachGiangVienHD}
-                        giangVienHD={giangVienHD}
-                        setGiangVienHD={setGiangVienHD}
+                        giangVien={giangVienHD}
+                        setGiangVien={setGiangVienHD}
                     ></InputGiangVien>
                     <Search searchValue={searchValue} setSearchValue={setSearchValue}></Search>
                 </div>

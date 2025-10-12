@@ -1,18 +1,19 @@
 import { HiChevronDown } from "react-icons/hi";
 import LabeledText from "./LabeledText";
+import { div } from "framer-motion/m";
 function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
     return (
         <>
             <tr
                 key={row[fields[0]]}
                 className={`${
-                    index % 2 == 0 && "bg-secondaryColor "
-                } cursor-pointer transition-colors `}
+                    index % 2 == 0 && "bg-secondaryColor"
+                } cursor-pointer transition-colors`}
                 onClick={() => {
                     handleRowOpening(row[fields[0]]);
                 }}
             >
-                <td className="flex gap-1.5 items-center px-4 py-2">
+                <td className="min-h-15 flex gap-1.5 items-center px-4 py-2">
                     <HiChevronDown
                         size={24}
                         className={`flex-shrink-0 inline-block leading-none align-middle transition-all text-textColor2 duration-500 ease-initial ${
@@ -25,9 +26,10 @@ function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
                 <td className="text-center px-4 py-2">{row[fields[3]]}</td>
                 <td className="text-center px-4 py-2">{row[fields[4]]}</td>
                 <td className="text-center px-4 py-2">{row[fields[5]]}</td>
+                {fields.length > 5 && <td className="text-center px-4 py-2">{row[fields[6]]}</td>}
             </tr>
             <tr key={row[fields[0]] + "detailed"}>
-                <td colSpan="5">{children}</td>
+                <td colSpan={fields.length - 1}>{children}</td>
             </tr>
         </>
     );
@@ -39,7 +41,7 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
     const renderDeTai = () => (
         <div
             className={`${
-                isOpen ? "max-h-120" : "max-h-0"
+                isOpen ? "max-h-160" : "max-h-0"
             } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
         >
             <span>
@@ -61,7 +63,7 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
     const renderBaiBao = () => (
         <div
             className={`${
-                isOpen ? "max-h-1000" : "max-h-0"
+                isOpen ? "max-h-160" : "max-h-0"
             } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
         >
             <LabeledText label="Tóm tắt">{row.tomTat}</LabeledText>
@@ -93,6 +95,30 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
             {/* TODO: chuyen nguon tham khao thanh accordion */}
         </div>
     );
+    const renderChuyenDe = () => (
+        <div
+            className={`${
+                isOpen ? "max-h-160" : "max-h-0"
+            } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-in-out`}
+        >
+            <LabeledText label="Nội dung báo cáo">
+                {row.noiDungBaoCao}
+            </LabeledText>
+            {/* TODO: chuyen nguon tham khao thanh accordion */}
+        </div>
+    );
+    const renderContent = () => {
+    switch (fields[0]) {
+        case "maDeTai":
+            return renderDeTai();
+        case "maBaiBao":
+            return renderBaiBao();
+        case "maChuyenDe":
+            return renderChuyenDe();
+        default:
+            return null;
+    }
+};
     return (
         <>
             <TRow
@@ -103,7 +129,7 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
                 handleRowOpening={handleRowOpening}
             >
                 {/* children: just make a div containing detailed information :> */}
-                {fields[0] === "maBaiBao" ? renderBaiBao() : renderDeTai()}
+                {renderContent()}
             </TRow>
         </>
     );

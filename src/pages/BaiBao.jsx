@@ -393,15 +393,15 @@ function TableBaiBao() {
     //     console.log(GiangVienHD_Selected); //test cac du lieu trong bang filter
     // }, [GiangVienHD_Selected], [LinhVuc], [capDeTai])
     function handleFilters() {
-        const search = searchValue.trim();
+        const search = searchValue.trim().toLowerCase();
         let data = DATA.filter(
             (item) =>
                 (loaiBaiBao === "" || item.loaiBaiBao === loaiBaiBao) &&
                 (search === "" ||
-                    item.tenBaiBao.includes(search) ||
-                    item.tacGia.includes(search) ||
-                    item.keywords.includes(search) ||
-                    item.tomTat.includes(search)) &&
+                    item.tenBaiBao.toLowerCase().includes(search) ||
+                    item.tacGia.toLowerCase().includes(search) ||
+                    item.keywords.toLowerCase().includes(search) ||
+                    item.tomTat.toLowerCase().includes(search)) &&
                 (namBD === "" || Number(item.ngayThucHien.split("/")[2]) >= Number(namBD)) &&
                 (namKT === "" || Number(item.ngayThucHien.split("/")[2]) <= Number(namKT))
         );
