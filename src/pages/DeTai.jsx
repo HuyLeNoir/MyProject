@@ -301,26 +301,6 @@ function TableDeTai() {
                 renderAmount={Number(NofRowPerPage)}
                 data={tableData}
             >
-                <div
-                    className={`${
-                        isOpen ? "max-h-120" : "max-h-0"
-                    } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
-                >
-                    <span>
-                        <span className="text-K2D text-primaryColor">Tóm tắt:</span> {row.tomTat}
-                    </span>
-                    <span className="text-K2D text-primaryColor">
-                        Giảng viên hướng dẫn: <span className="text-textColor1">{row.GVHD}</span>
-                    </span>
-                    <div className="flex flex-col">
-                        <span className="text-K2D text-primaryColor">Các thành viên tham gia:</span>
-                        <ol className="list-decimal list-inside p-2 flex flex-col">
-                            {row.members.map((member, index) => (
-                                <li key={member + " " + index}>{member}</li>
-                            ))}
-                        </ol>
-                    </div>
-                </div>
             </Table>
             <Pagination
                 setCurrentPage={setCurrentPage}
