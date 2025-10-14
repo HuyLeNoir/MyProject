@@ -16,9 +16,10 @@ export default function TextInput({fieldName, users, giangVien , setGiangVien}){
     function handleUserInput(e){
         setOpen(true)
         setGiangVien(prev => ({...prev, Name: e.target.value}))
-        console.log(e.target.value) //function test
+        console.log(e.target.value) //test
         const result = users.filter(user =>
-            user.Name.toLowerCase().includes(e.target.value.toLowerCase())
+            (user.Name.toLowerCase().includes(e.target.value.toLowerCase())) ||
+            (user.MSCB.includes(e.target.value))
         );
         if(e.target.value == "" || result.length == 0){
             setOpen(false)
@@ -27,6 +28,7 @@ export default function TextInput({fieldName, users, giangVien , setGiangVien}){
     }
     function onSelectGiangVien(user){
         setOpen(false);
+        console.log("selected ", user)
         setGiangVien(user);
     }
     return (

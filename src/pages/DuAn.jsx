@@ -13,7 +13,7 @@ import Footer from "./components/Footer.jsx";
 //TODO: New normal table componenet
 
 function Main({ children }) {
-    return <div className="Wrapper p-4">{children}</div>;
+    return <div className="Wrapper p-4 font-K2D">{children}</div>;
 }
 
 function TableDuAn() {
@@ -63,10 +63,10 @@ function TableDuAn() {
         {
             maDuAn: "maDuAn06",
             tenDuAn: "Tên dự án 33339999",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
+            thanhVien: "Mã Trường Thành Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
             capDuAn: "Cấp nhà nước",
             kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
+            thoiGianThucHien: "13/7/2021 - 13/10/2022",
         },
     ];
     const Theads = [
@@ -103,13 +103,23 @@ function TableDuAn() {
     const [namBD, setNamBD] = useState("");
     const [namKT, setNamKT] = useState("");
     //cac bien dung trong danh so trang
-
+    const defaultRowPerPage = 10;
     const [currentPage, setCurrentPage] = useState(0);
-    const [NofRowPerPage, setNofRowPerPage] = useState(10); //so row hien thi trong 1 table default: 10
+    const [NofRowPerPage, setNofRowPerPage] = useState(defaultRowPerPage); //so row hien thi trong 1 table default: 10
     const totalRows = DATA.length;
     const currentRows = tableData.length;
     const NoOfPage = Math.ceil(currentRows / NofRowPerPage);
     function handleFilters() {
+        let search = searchValue.toLowerCase().trim();
+        let data = DATA.filter(
+            (item) =>
+                (capDuAn === "" || item.capDuAn === capDuAn) &&
+                (giangVien.Name === "" || item.thanhVien.includes(giangVien.Name)) &&
+                (search === "" || item.tenDuAn.toLowerCase().includes(search)) &&
+                (namBD === "" || Number(item.thoiGianThucHien.split("-")[0].split("/")[2].trim()) >= Number(namBD)) &&
+                (namKT === "" || Number(item.thoiGianThucHien.split("-")[1].split("/")[2].trim()) <= Number(namKT))
+        );
+        setTableData(data);
     }
     function clearFilters() {
         setSearchValue("");

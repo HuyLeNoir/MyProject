@@ -2,9 +2,7 @@ import "../App.css";
 import { useEffect, useState, useRef } from "react";
 import InputGiangVien from "./components/InputGiangVien.jsx";
 import Pagination from "./components/pagination.jsx";
-import DropDown from "./components/Dropdown.jsx";
-import AccordionTable from "./components/AccordionTable.jsx";
-import Search from "./components/Search.jsx";
+import Table from "./components/NormalTable.jsx";
 import NavigationBar from "./components/NavBar.jsx";
 import MyButton from "./components/MyButton.jsx";
 import Header from "./components/header.jsx";
@@ -19,64 +17,29 @@ function Main({ children }) {
 function TableDuAn() {
     //fetch data lien quan tu csdl
     const DATA = [
-        {
-            maDuAn: "maDuAn01",
-            tenDuAn: "Tên dự án 1",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",  
-            capDuAn: "Cấp cơ sở",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-
-        },
-        {
-            maDuAn: "maDuAn02",
-            tenDuAn: "Tên dự án 2",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp bộ",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn03",
-            tenDuAn: "Tên dự án 3",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp nhà nước",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn04",
-            tenDuAn: "Tên dự án abcxyz",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp địa phương",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn05",
-            tenDuAn: "Tên dự án áidákdjákdjákdjaksd",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp bộ",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn06",
-            tenDuAn: "Tên dự án 33339999",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp nhà nước",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
+        {hoTenGV: "Mã Trường Thành", MSCB:"002937", hocVi: "Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Võ Trí Thức", MSCB:"002483", hocVi: "Nghiên cứu sinh", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Trần Nguyễn Minh Thư", MSCB:"002635", hocVi: "Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Trần Việt Châu", MSCB:"002692", hocVi: "Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Phạm Nguyên Khang", MSCB:"001348", hocVi: "Phó Giáo Sư - Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Lê Quyết Thắng", MSCB:"000509", hocVi: "Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Lưu Tiến Đạo", MSCB:"002805", hocVi: "Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Phạm Xuân Hiền", MSCB:"001707", hocVi: "Thạc sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Trần Nguyễn Dương Chi", MSCB:"002684", hocVi: "Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Phan Bích Chung", MSCB:"002265", hocVi: "Thạc sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Nguyễn Bá Diệp", MSCB:"002484", hocVi: "Nghiên cứu sinh", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Phạm Nguyên Hoàng", MSCB:"002640", hocVi: "Thạc sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
+        {hoTenGV: "Huỳnh Ngọc Thái Anh", MSCB:"002854", hocVi: "Thạc sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
     ];
     const Theads = [
-        { size: "w-[30%]", fieldName: "Tên dự án" },
-        { size: "w-[30%]", fieldName: "Thành viên tham gia" },
-        { size: "", fieldName: "Kinh phí thực hiện" },
-        { size: "", fieldName: "Cấp dự án" },
-        { size: "", fieldName: "Thời gian thực hiện" },
+        { size: "w-[30%]", fieldName: "Tên giảng viên" },
+        { size: "", fieldName: "Mã số cán bộ" },
+        { size: "", fieldName: "Trình độ chuyên môn" },
+        { size: "", fieldName: "Email" },
+        { size: "", fieldName: "SDT" },
     ];
-    const fields = ["maDuAn", "tenDuAn", "thanhVien", "kinhPhi", "capDuAn", "thoiGianThucHien"];
+    //field[0] phai la key nen lap lai mscb
+    const fields = ["MSCB", "hoTenGV", "MSCB", "hocVi", "emailGV", "sdtGV"];
     const giangVienKHMT = [
         {Name: "Mã Trường Thành", MSCB:"002937"},
         {Name: "Võ Trí Thức", MSCB:"002483"},
@@ -104,12 +67,13 @@ function TableDuAn() {
     const currentRows = tableData.length;
     const NoOfPage = Math.ceil(currentRows / NofRowPerPage);
     function handleFilters() {
+        const data = DATA.filter(item => (
+            (giangVien.Name === "" || item.hoTenGV === giangVien.Name)
+        ))
+        setTableData(data);
     }
     function clearFilters() {
-        setSearchValue("");
-        setCapDuAn("");
-        setNamBD("");
-        setNamKT("");
+        setGiangVien({Name: "", MSCB: ""});
         setTableData(DATA);
     }
     return (
@@ -124,7 +88,7 @@ function TableDuAn() {
                 </MyButton>
                 <div className="flex gap-2.5 tableNavigation">
                     <InputGiangVien
-                        fieldName={"Giảng viê"}
+                        fieldName={"Giảng viên"}
                         users={giangVienKHMT}
                         giangVien={giangVien}
                         setGiangVien={setGiangVien}
@@ -149,13 +113,14 @@ function TableDuAn() {
                     </MyButton>
                 </div>
             </div>
-            <AccordionTable
+            <Table
+                variant="withAvatar"
                 Theads={Theads}
                 fields={fields}
                 currentPage={currentPage}
                 renderAmount={Number(NofRowPerPage)}
                 data={tableData}
-            ></AccordionTable>
+            ></Table>
             <Pagination
                 setCurrentPage={setCurrentPage}
                 numberOfRows={totalRows}
@@ -166,7 +131,7 @@ function TableDuAn() {
         </>
     );
 }
-function DuAn() {
+function GiangVien() {
     return (
         <div className="font-K2D bg-backgroundColor">
             <Header>
@@ -180,4 +145,4 @@ function DuAn() {
     );
 }
 
-export default DuAn;
+export default GiangVien;

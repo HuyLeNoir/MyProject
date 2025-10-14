@@ -11,7 +11,7 @@ export default function Header( {children} ){
                 <img className='aspect-square w-25' src={logo1} alt='logoCtu'/>
                 <img className='aspect-square w-25' src={logo2} alt='logoCtu'/>
             </div>
-            <div className='text-K2D text-textColor1 flex flex-col gap-1 items-center justify-center'>
+            <div className='font-K2D text-textColor1 flex flex-col gap-1 items-center justify-center'>
                 <p className='text-h5'>Khoa Khoa Học Máy Tính</p>
                 <p className='text-h2 font-semibold'>Hệ thống quản lý nghiên cứu khoa học</p>
             </div>
