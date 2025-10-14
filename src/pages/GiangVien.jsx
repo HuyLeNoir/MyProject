@@ -14,7 +14,7 @@ function Main({ children }) {
     return <div className="Wrapper p-4">{children}</div>;
 }
 
-function TableDuAn() {
+function TableGiangVien() {
     //fetch data lien quan tu csdl
     const DATA = [
         {hoTenGV: "Mã Trường Thành", MSCB:"002937", hocVi: "Tiến sĩ", emailGV: "abcxyz@ctu.edu.vn", sdtGV :"0999999999"},
@@ -138,7 +138,7 @@ function GiangVien() {
                 <NavigationBar></NavigationBar>
             </Header>
             <Main>
-                <TableDuAn></TableDuAn>
+                <TableGiangVien></TableGiangVien>
             </Main>
             <Footer></Footer>
         </div>

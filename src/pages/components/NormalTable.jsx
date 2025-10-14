@@ -1,11 +1,15 @@
 import AvatarColumn from "./Avatar";
-function TableRow({ row, fields, index }) {
+function TableRow({variant, row, fields, index }) {
+    let start = variant === "withAvatar" ? 2 : 1;
     return(
         <tr className={`${index % 2 === 0 ? "bg-secondaryColor" : "bg-white"}`} key={index}>
+            {variant === "withAvatar" && <td className="px-4 py-2">
+                <AvatarColumn name={row["hoTenGV"]} email={row["emailGV"]} MSCB={row[fields[0]]}></AvatarColumn>
+            </td>}
             {
                 //field == column :>
-                fields.slice(1).map((field, index) => {
-                    const align = index === 0 ? "text-left" : "text-center";
+                fields.slice(start).map((field, index) => {
+                    const align = index === 0 && variant !== "withAvatar" ? "text-left" : "text-center";
                     return (
                         <td className={`${align} px-4 py-2`} key={field + index}>
                             {row[field]}
@@ -35,7 +39,7 @@ function TableRowWithAvatarColumn({ row, fields, index }) {
         </tr>
     );
 }
-export default function NormalTable({Theads, fields, currentPage, renderAmount, data }) {
+export default function NormalTable({variant, Theads, fields, currentPage, renderAmount, data }) {
     return (
         <div className="p-4">
             <table className="min-w-full rounded-lg overflow-hidden">
@@ -55,12 +59,13 @@ export default function NormalTable({Theads, fields, currentPage, renderAmount, 
                             renderAmount * currentPage + renderAmount
                         )
                         .map((row, index) => (
-                            <TableRowWithAvatarColumn
+                            <TableRow
+                                variant={variant}
                                 key={index}
                                 index={index}
                                 row={row}
                                 fields={fields}
-                            ></TableRowWithAvatarColumn>
+                            ></TableRow>
                         ))}
                 </tbody>
             </table>
