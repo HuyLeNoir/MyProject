@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import InputGiangVien from "./components/InputGiangVien.jsx";
 import Pagination from "./components/pagination.jsx";
 import DropDown from "./components/Dropdown.jsx";
-import Table from "./components/NormalTable.jsx";
+import AccordionTable from "./components/AccordionTable.jsx";
 import Search from "./components/Search.jsx";
 import NavigationBar from "./components/NavBar.jsx";
 import MyButton from "./components/MyButton.jsx";
@@ -77,8 +77,6 @@ function TableDuAn() {
         { size: "", fieldName: "Thời gian thực hiện" },
     ];
     const fields = ["maDuAn", "tenDuAn", "thanhVien", "kinhPhi", "capDuAn", "thoiGianThucHien"];
-    const years = ["2020", "2021", "2022", "2023", "2024", "2025"];
-    const cacCapDuAn = ["Cấp sinh viên", "Cấp cơ sở", "Cấp nghiên cứu sinh", "Cấp địa phương", "Cấp bộ", "Cấp nhà nước"];
     const giangVienKHMT = [
         {Name: "Mã Trường Thành", MSCB:"002937"},
         {Name: "Võ Trí Thức", MSCB:"002483"},
@@ -98,10 +96,6 @@ function TableDuAn() {
 
     const [giangVien, setGiangVien] = useState({ Name: "", MSCB: "" });
     const [tableData, setTableData] = useState(DATA);
-    const [capDuAn, setCapDuAn] = useState("");
-    const [searchValue, setSearchValue] = useState("");
-    const [namBD, setNamBD] = useState("");
-    const [namKT, setNamKT] = useState("");
     //cac bien dung trong danh so trang
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -129,37 +123,12 @@ function TableDuAn() {
                     Xuất danh sách
                 </MyButton>
                 <div className="flex gap-2.5 tableNavigation">
-                    <DropDown
-                        size="medium"
-                        selected={capDuAn}
-                        setSelected={setCapDuAn}
-                        fieldName="Cấp dự án"
-                        open={false}
-                        options={cacCapDuAn}
-                    ></DropDown>
                     <InputGiangVien
-                        fieldName={"Giảng viên tham gia"}
+                        fieldName={"Giảng viê"}
                         users={giangVienKHMT}
                         giangVien={giangVien}
                         setGiangVien={setGiangVien}
                     ></InputGiangVien>
-                    <DropDown
-                        size="auto"
-                        selected={namBD}
-                        setSelected={setNamBD}
-                        fieldName="Từ năm"
-                        open={false}
-                        options={years}
-                    ></DropDown>
-                    <DropDown
-                        size="auto"
-                        selected={namKT}
-                        setSelected={setNamKT}
-                        fieldName="Đến năm"
-                        open={false}
-                        options={years}
-                    ></DropDown>
-                    <Search searchValue={searchValue} setSearchValue={setSearchValue}></Search>
                 </div>
                 <div className="flex gap-2.5">
                     <MyButton
@@ -180,13 +149,13 @@ function TableDuAn() {
                     </MyButton>
                 </div>
             </div>
-            <Table
+            <AccordionTable
                 Theads={Theads}
                 fields={fields}
                 currentPage={currentPage}
                 renderAmount={Number(NofRowPerPage)}
                 data={tableData}
-            ></Table>
+            ></AccordionTable>
             <Pagination
                 setCurrentPage={setCurrentPage}
                 numberOfRows={totalRows}

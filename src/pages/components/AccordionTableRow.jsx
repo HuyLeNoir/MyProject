@@ -1,6 +1,5 @@
 import { HiChevronDown } from "react-icons/hi";
 import LabeledText from "./LabeledText";
-import { div } from "framer-motion/m";
 function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
     return (
         <>
