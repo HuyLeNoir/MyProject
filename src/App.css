@@ -4,7 +4,8 @@
 @source "../.flowbite-react/class-list.json";
 
 @theme {
-    --font-K2D: "K2D";
+    --font-display: "K2D", sans-serif; 
+    --font-K2D: "K2D", sans-serif;
     --text-smaller: 11.1px;
     --text-small: 13.3px;
     --text-p: 16px;
@@ -16,6 +17,9 @@
     --text-h1: 47.8px;
     --text-title: 64px;
     --color-textColor1: #1E1E1E;
+    --color-ctuColor1: #1B59A6;
+    --color-ctuColor2: #23A9E1;
+    --color-ctuGray: #343433;
     --color-textColor2: #4D4D4D;
     --color-textColor3: #808080;
     --color-buttonColor: #D8E1F3;

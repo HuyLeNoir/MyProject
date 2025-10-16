@@ -12,7 +12,7 @@ export default function Header( {children} ){
                 <img className='aspect-square w-25' src={logo2} alt='logoCtu'/>
             </div>
             <div className='font-K2D text-textColor1 flex flex-col gap-1 items-center justify-center'>
-                <p className='text-h5'>Khoa Khoa Học Máy Tính</p>
+                <p className='text-h5'>Khoa Khoa học máy tính</p>
                 <p className='text-h2 font-semibold'>Hệ thống quản lý nghiên cứu khoa học</p>
             </div>
             <div onClick={() => navigate("/login")} className='bg-buttonColor rounded-md p-2 cursor-pointer flex items-center justify-center self-start group'>

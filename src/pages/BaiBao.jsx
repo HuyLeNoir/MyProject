@@ -490,7 +490,7 @@ function TableBaiBao() {
 }
 function BaiBao() {
     return (
-        <div className="font-K2D bg-backgroundColor">
+        <div className="font-display bg-backgroundColor">
             <Header>
                 <NavigationBar></NavigationBar>
             </Header>

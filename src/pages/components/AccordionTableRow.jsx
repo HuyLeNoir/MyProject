@@ -21,11 +21,16 @@ function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
                     ></HiChevronDown>
                     <span>{row[fields[1]]}</span>
                 </td>
-                <td className="text-center px-4 py-2">{row[fields[2]]}</td>
+                {
+                    fields.slice(2).map(field=>(
+                        <td className="text-center px-4 py-2">{row[field]}</td>
+                    ))
+                }
+                {/* <td className="text-center px-4 py-2">{row[fields[2]]}</td>
                 <td className="text-center px-4 py-2">{row[fields[3]]}</td>
                 <td className="text-center px-4 py-2">{row[fields[4]]}</td>
                 <td className="text-center px-4 py-2">{row[fields[5]]}</td>
-                {fields.length > 5 && <td className="text-center px-4 py-2">{row[fields[6]]}</td>}
+                {fields.length > 5 && <td className="text-center px-4 py-2">{row[fields[6]]}</td>} */}
             </tr>
             <tr key={row[fields[0]] + "detailed"}>
                 <td colSpan={fields.length - 1}>{children}</td>
@@ -34,7 +39,6 @@ function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
     );
 }
 
-//TODO: normalize accordion row : checked
 export default function AccordionTableRow({ isOpen, handleRowOpening, row, fields, index }) {
     //Kiem tra fields[0] (maDeTai/maBaiBao dung lam key de phan biet cac loai bang voi nhau => tu do render cac kieu bang khac nhau)
     const renderDeTai = () => (

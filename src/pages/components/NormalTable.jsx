@@ -20,25 +20,6 @@ function TableRow({variant, row, fields, index }) {
         </tr>
     );
 }
-function TableRowWithAvatarColumn({ row, fields, index }) {
-    return(
-        <tr className={`${index % 2 === 0 ? "bg-secondaryColor" : "bg-white"}`} key={index}>
-            <td className="px-4 py-2">
-                <AvatarColumn name={row["hoTenGV"]} email={row["emailGV"]} MSCB={row[fields[0]]}></AvatarColumn>
-            </td>
-            {
-                //field == column :>
-                fields.slice(2).map((field, index) => {
-                    return (
-                        <td className={`text-center px-4 py-2`} key={field + index}>
-                            {row[field]}
-                        </td>
-                    );
-                })
-            }
-        </tr>
-    );
-}
 export default function NormalTable({variant, Theads, fields, currentPage, renderAmount, data }) {
     return (
         <div className="p-4">
