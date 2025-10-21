@@ -5,11 +5,7 @@ export default function Table({ renderAmount, currentPage, Theads, data, fields 
     //{id, open/close}
     function handleRowOpening(id) {
         setRows((prev) => ({ ...prev, [id]: !prev[id] })); //trang thai open/close cua cac row
-        console.log("open" + id);
     }
-    useEffect(() => {
-        console.log(rows);
-    }, [rows]);
     return (
         <div className="p-4">
             <table className="min-w-full rounded-lg overflow-hidden">

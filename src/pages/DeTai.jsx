@@ -5,7 +5,7 @@ import DropDown from "./components/Dropdown.jsx";
 import InputGiangVien from "./components/InputGiangVien.jsx";
 import Table from "./components/AccordionTable.jsx";
 import Search from "./components/Search.jsx";
-import NavigationBar from "./components/NavBar.jsx";
+import NavigationBar from "./components/removed/NavBar.jsx";
 import MyButton from "./components/MyButton.jsx";
 import Header from "./components/header.jsx";
 import Footer from "./components/Footer.jsx";
@@ -315,9 +315,7 @@ function TableDeTai() {
 function DeTai() {
     return (
         <div className="font-display bg-backgroundColor">
-            <Header>
-                <NavigationBar></NavigationBar>
-            </Header>
+            
             <Main>
                 <TableDeTai></TableDeTai>
             </Main>
@@ -327,3 +325,4 @@ function DeTai() {
 }
 
 export default DeTai;
+

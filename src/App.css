@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=K2D:ital,wght@0,200;0,400;0,600;1,200;1,400;1,600&display=swap');
 @import "tailwindcss";
-@plugin "flowbite-react/plugin/tailwindcss";
-@source "../.flowbite-react/class-list.json";
 
 @theme {
     --font-display: "K2D", sans-serif; 
@@ -23,7 +21,9 @@
     --color-textColor2: #4D4D4D;
     --color-textColor3: #808080;
     --color-buttonColor: #D8E1F3;
+    --color-redWarning: #FF2727;
     --color-backgroundColor: #FAFAFA;
+    --color-testCoor: #A1AED1;
     --color-secondaryColor: #EFEFEF;
     --color-primaryColor: #30569E;
     --color-successColor: #8FFEAD;

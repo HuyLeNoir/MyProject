@@ -4,7 +4,7 @@ import Pagination from "./components/pagination.jsx";
 import DropDown from "./components/Dropdown.jsx";
 import AccordionTable from "./components/AccordionTable.jsx";
 import Search from "./components/Search.jsx";
-import NavigationBar from "./components/NavBar.jsx";
+import NavigationBar from "./components/removed/NavBar.jsx";
 import MyButton from "./components/MyButton.jsx";
 import Header from "./components/header.jsx";
 import Footer from "./components/Footer.jsx";
@@ -491,9 +491,6 @@ function TableBaiBao() {
 function BaiBao() {
     return (
         <div className="font-display bg-backgroundColor">
-            <Header>
-                <NavigationBar></NavigationBar>
-            </Header>
             <Main>
                 <TableBaiBao></TableBaiBao>
             </Main>

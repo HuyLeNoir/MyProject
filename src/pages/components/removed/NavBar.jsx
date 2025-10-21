@@ -1,4 +1,4 @@
-import NavItem from "./navItem";
+import NavItem from "../navItem";
 export default function NavigationBar(){
     return(
         <div className='flex gap-0 NavBar'>

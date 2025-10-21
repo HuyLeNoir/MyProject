@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import InputGiangVien from "./components/InputGiangVien.jsx";
 import Pagination from "./components/pagination.jsx";
 import Table from "./components/NormalTable.jsx";
-import NavigationBar from "./components/NavBar.jsx";
+import NavigationBar from "./components/removed/NavBar.jsx";
 import MyButton from "./components/MyButton.jsx";
 import Header from "./components/header.jsx";
 import Footer from "./components/Footer.jsx";
@@ -134,9 +134,6 @@ function TableGiangVien() {
 function GiangVien() {
     return (
         <div className="font-display bg-backgroundColor">
-            <Header>
-                <NavigationBar></NavigationBar>
-            </Header>
             <Main>
                 <TableGiangVien></TableGiangVien>
             </Main>
