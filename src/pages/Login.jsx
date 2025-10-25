@@ -20,8 +20,8 @@ export function TextInput({ value, IconLeft, IconRight, onChange, placeHolder, n
         </div>
     );
 }
-function Toast({ ToastDisplay, ToastSuccess, SetToastDisplay, ToastMessage }) {
-    const pos = ToastDisplay ? "top-2 opacity-100" : "-top-20 opacity-0";
+export function Toast({ ToastDisplay, ToastSuccess, SetToastDisplay, ToastMessage }) {
+    const pos = ToastDisplay ? "top-4 opacity-100" : "-top-20 opacity-0";
     const bgColor = ToastSuccess ? "bg-successColor" : "bg-warningColor";
     //-20-> 1
     useEffect(() => {
@@ -29,11 +29,15 @@ function Toast({ ToastDisplay, ToastSuccess, SetToastDisplay, ToastMessage }) {
         return () => clearTimeout(timer); // cleanup tránh leak
     }, [ToastDisplay]);
     return (
-        <div
-            className={`rounded-sm text-textColor1 text-p px-2 py-1 ${bgColor} absolute ${pos} transition-all ease-in-out`}
-        >
-            <p>{ToastMessage}</p>
-        </div>
+        ToastDisplay && (
+            <div className="fixed w-screen z-99999 flex-col pointer-events-none h-screen top-0 inset-x-0 flex items-center justify-start">
+                <div
+                    className={`rounded-sm text-textColor1 text-h5 px-2 py-1 ${bgColor} absolute ${pos} transition-all ease-in-out`}
+                >
+                    <p>{ToastMessage}</p>
+                </div>
+            </div>
+        )
     );
 }
 function Login() {
@@ -53,7 +57,7 @@ function Login() {
     }
     async function handleSubmit(e) {
         e.preventDefault();
-        const res = await fetch("http://localhost:3000/login", {
+        const res = await fetch("/api/login", {
             method: "post",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(inputs),
@@ -63,10 +67,13 @@ function Login() {
             setToastMessage(response.message);
             console.log(response.message);
             setToastSuccess(response.success);
+
             if (response.success) {
                 localStorage.setItem("user", JSON.stringify(response.body));
                 setUser(response.body);
-                navigate("/detai");
+                setTimeout(() => {
+                    navigate("/detais");
+                }, 5000);
             }
         }
         SetToastDisplay(true);
@@ -116,7 +123,7 @@ function Login() {
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
-                                navigate("/detai");
+                                navigate("/detais");
                             }}
                             className="px-3 py-2 rounded-md cursor-pointer duration-500 ease-in-out transition-all text-textColor2 border-2 border-ctuColor1 shrink-0 grow-0 self-center"
                         >

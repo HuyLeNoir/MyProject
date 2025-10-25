@@ -4,6 +4,7 @@ import { HiUserCircle, HiChevronDown } from "react-icons/hi";
 
 export default function DropDown({
     className = "",
+    defaultValue,
     size = "default",
     children,
     fieldName,
@@ -33,6 +34,12 @@ export default function DropDown({
         setSelect(option);
         setOpen(false);
     }
+    useEffect(() => {
+        () => {
+            defaultValue || setSelect(defaultValue); //set default
+        };
+    }, []);
+
     return (
         <div className={className}>
             <div className="flex gap-2.5 items-center" ref={dropDownRef}>

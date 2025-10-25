@@ -2,7 +2,8 @@ import MyButton from "./components/MyButton";
 import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import DropDown from "./components/NewDropdown";
-import { Outlet, useParams, Link, Form } from "react-router-dom";
+import { Outlet, useParams, Link } from "react-router-dom";
+import { TextWithLabel, OnlyText } from "./components/Form";
 import {
     Table,
     TableRow,
@@ -14,28 +15,7 @@ import {
 } from "./components/TableOverhaul";
 import NewDropDown from "./components/NewDropdown";
 import TextInput from "./components/InputGiangVien";
-function textArea() {}
-function Test({ id, props, className = "", children }) {
-    return (
-        <span className="text-p flex flex-col justify-start">
-            <label className="whitespace-nowrap" htmlFor={id}>
-                {children}
-            </label>
-            <input
-                {...props}
-                className={`${className} h-10 px-2 outline-0 border-b-2 transition-all ease-in-out duration-300 border-secondaryColor hover:border-primaryColor focus:border-primaryColor`}
-            />
-        </span>
-    );
-}
-function AdminTextInput({ props, className = "" }) {
-    return (
-        <input
-            {...props}
-            className={`${className} h-10 px-2 outline-0 border-b-2 transition-all ease-in-out duration-300 border-secondaryColor hover:border-primaryColor focus:border-primaryColor`}
-        />
-    );
-}
+
 export function EditDeTai() {
     const { id } = useParams();
     return <div></div>;
@@ -63,14 +43,16 @@ export function NewDeTai() {
         <>
             <div className="flex gap-2.5 justify-left items-center">
                 <MyButton className="bg-buttonColor aspect-square h-12">
-                    <HiArrowLeft size={32}></HiArrowLeft>
+                    <Link to="/admin/detais">
+                        <HiArrowLeft size={32}></HiArrowLeft>
+                    </Link>
                 </MyButton>
                 <h1 className="text-h2 font-semibold my-2.5">Thêm một đề tài mới</h1>
             </div>
             <div className="relative bg-white p-5 shadow-md border-1 flex flex-col items-start gap-2.5 border-gray-200">
-                <Test name={"tenDeTai"} className="w-200" id="tenDeTai">
+                <TextWithLabel name={"tenDeTai"} className="w-200" id="tenDeTai">
                     Tên đề tài
-                </Test>
+                </TextWithLabel>
                 <div className="flex gap-2.5">
                     <NewDropDown size="medium" fieldName={"Lĩnh vực"}>
                         <li>Y tế</li>
@@ -92,9 +74,10 @@ export function NewDeTai() {
                     fieldName={"Giảng viên hướng dẫn"}
                 ></TextInput>
                 <div className="flex gap-2.5 items-center justify-center">
-                    <Test id="chuNhiem" placeHolder="Nhập MSSV để thêm">
+                    <TextWithLabel id="chuNhiem" placeHolder="Nhập MSSV để thêm">
                         Chủ nhiệm đề tài
-                    </Test>
+                    </TextWithLabel>
+                    {/* FIX THIS */}
                     <button className="bg-buttonColor flex items-center justify-center rounded-true aspect-square cursor-pointer hover:shadow-xs h-10">
                         <HiPlus size={24} />
                     </button>
@@ -162,14 +145,14 @@ export function DanhSachDeTai() {
                         <span className=" h-[42px] bg-buttonColor aspect-square flex justify-center items-center rounded-bl-md rounded-tl-md text-textColor2">
                             <HiSearch size={24}></HiSearch>
                         </span>
-                        <AdminTextInput
+                        <OnlyText
                             type={"text"}
                             name={"searchBar"}
                             id={"searchBar"}
                             onChange={handleChange}
                             value={searchValue}
                             placeHolder={"Mã hoặc tên đề tài"}
-                        ></AdminTextInput>
+                        ></OnlyText>
                         <button
                             className={
                                 "bg-buttonColor text-textColor2 px-1 cursor-pointer text-p rounded-br-md rounded-tr-md whitespace-nowrap h-full"
@@ -286,10 +269,8 @@ export function DanhSachDeTai() {
                                     Cần Thơ
                                 </Link>
                             </TableCell>
-                            <TableCell className="whitespace-nowrap text-center">
-                                Địa phương
-                            </TableCell>
-                            <TableCell className="whitespace-nowrap text-center">Kinh tế</TableCell>
+                            <TableCell className="text-center">Địa phương</TableCell>
+                            <TableCell className="text-center">Kinh tế</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell>
@@ -305,10 +286,8 @@ export function DanhSachDeTai() {
                                 Đánh giá trình độ và năng lực công nghệ sản xuất của doanh nghiệp và
                                 các ngành, lĩnh vực sản xuất trên địa bàn thành phố Cần Thơ
                             </TableCell>
-                            <TableCell className="whitespace-nowrap text-center">
-                                Địa phương
-                            </TableCell>
-                            <TableCell className="whitespace-nowrap text-center">Kinh tế</TableCell>
+                            <TableCell className="text-center">Địa phương</TableCell>
+                            <TableCell className="text-center">Kinh tế</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>

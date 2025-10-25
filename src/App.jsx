@@ -11,10 +11,12 @@ import Admin, {
     ChuyenDe as AdminChuyenDe,
     DuAn as AdminDuAn,
     GiangVien as AdminGiangVien,
-    NguoiDung as AdminNguoiDung,
-    DanhMuc as AdminDanhMuc,
 } from "./pages/Admin";
 import { DeTai as AdminDeTai, DanhSachDeTai, NewDeTai, EditDeTai } from "./pages/AdminDeTai";
+import AdminNguoiDung from "./pages/AdminNguoiDung";
+import AdminDanhMucCap from "./pages/AdminDanhMucCap";
+import AdminDanhMucLinhVuc from "./pages/AdminDanhMucLinhVuc";
+
 import Header from "./pages/components/header";
 import NavItem from "./pages/components/navItem";
 import { useState, createContext, useEffect, useContext } from "react";
@@ -34,54 +36,61 @@ function AppContent() {
     }, []);
     return (
         <UserContext.Provider value={{ user, setUser }}>
-            {location.pathname !== "/login" && !location.pathname.includes("/Admin") && (
+            {location.pathname !== "/login" && !location.pathname.includes("/admin") && (
                 <Header>
                     <div className="flex gap-0 NavBar">
                         <NavItem
-                            navigateToTarget="/detai"
+                            navigateToTarget="/detais"
                             fieldName="Danh sách đề tài NCKH"
                         ></NavItem>
-                        <NavItem navigateToTarget="/baibao" fieldName="Danh sách bài báo"></NavItem>
                         <NavItem
-                            navigateToTarget="/chuyende"
+                            navigateToTarget="/publications"
+                            fieldName="Danh sách bài báo"
+                        ></NavItem>
+                        <NavItem
+                            navigateToTarget="/seminars"
                             fieldName="Danh sách chuyên đề"
                         ></NavItem>
-                        <NavItem navigateToTarget="/duan" fieldName="Danh sách dự án"></NavItem>
+                        <NavItem navigateToTarget="/projects" fieldName="Danh sách dự án"></NavItem>
                         <NavItem
-                            navigateToTarget="/giangvien"
+                            navigateToTarget="/teachers"
                             fieldName="Danh sách giảng viên"
                         ></NavItem>
                     </div>
                 </Header>
             )}
             <Routes>
-                <Route path="/" element={<Navigate to="/detai" replace />} />
-                <Route path="/Admin" element={<Admin />}>
+                <Route path="/" element={<Navigate to="/detais" replace />} />
+                <Route path="/admin" element={<Admin />}>
                     <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="detai" element={<AdminDeTai />}>
+                    <Route path="detais" element={<AdminDeTai />}>
                         <Route index element={<DanhSachDeTai />}></Route>
                         <Route path="new" element={<NewDeTai />}></Route>
                         <Route path="edit/:id" element={<EditDeTai />}></Route>
                     </Route>
-                    <Route path="baibao" element={<AdminBaiBao />} />
-                    <Route path="chuyende" element={<AdminChuyenDe />} />
-                    <Route path="duan" element={<AdminDuAn />} />
-                    <Route path="giangvien" element={<AdminGiangVien />} />
-                    <Route path="nguoidung" element={<AdminNguoiDung />} />
-                    <Route path="danhmuc" element={<AdminDanhMuc />} />
+                    <Route path="publications" element={<AdminBaiBao />} />
+
+                    <Route path="seminars" element={<AdminChuyenDe />} />
+
+                    <Route path="projects" element={<AdminDuAn />} />
+
+                    <Route path="teachers" element={<AdminGiangVien />} />
+                    <Route path="users" element={<AdminNguoiDung />} />
+                    <Route path="danhmuc/cap" element={<AdminDanhMucCap />}></Route>
+                    <Route path="danhmuc/linhvuc" element={<AdminDanhMucLinhVuc />}></Route>
                 </Route>
-                <Route path="/detai" element={<DeTai />} />
-                <Route path="/baibao" element={<BaiBao />} />
-                <Route path="/chuyende" element={<ChuyenDe />} />
-                <Route path="/duan" element={<DuAn />} />
-                <Route path="/giangvien" element={<GiangVien />} />
+                <Route path="/detais" element={<DeTai />} />
+                <Route path="/publications" element={<BaiBao />} />
+                <Route path="/seminars" element={<ChuyenDe />} />
+                <Route path="/projects" element={<DuAn />} />
+                <Route path="/teachers" element={<GiangVien />} />
                 <Route path="/login" element={<Login />} />
             </Routes>
         </UserContext.Provider>
     );
 }
 
-export default function App() {
+export function App() {
     return (
         <BrowserRouter>
             <AppContent />

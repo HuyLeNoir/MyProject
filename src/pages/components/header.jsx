@@ -30,7 +30,7 @@ export default function Header({ children }) {
                         <div className="flex gap-2.5 justify-center items-center">
                             <HiUserCircle size={24}></HiUserCircle>
                             <p className="text-h6 font-K2D text-textColor1">
-                                Xin chào, {user.userId}
+                                Xin chào, {user.HO_TEN_USER}
                             </p>
                         </div>
                         <MyButton

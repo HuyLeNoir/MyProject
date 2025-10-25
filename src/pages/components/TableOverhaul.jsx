@@ -10,7 +10,7 @@ export function Table({ children, className = "", ...props }) {
 
 export function TableHead({ children, className = "", ...props }) {
     return (
-        <thead className={`${className} bg-white text-textColor2`} {...props}>
+        <thead className={`${className} bg-blue-50 text-textColor2`} {...props}>
             {children}
         </thead>
     );
@@ -34,7 +34,7 @@ export function TableRow({ children, className = "", ...props }) {
 
 export function TableHeadCell({ children, className = "", ...props }) {
     return (
-        <th className={`${className} px-4 py-4 whitespace-nowrap`} {...props}>
+        <th className={`${className} px-4 py-4`} {...props}>
             {children}
         </th>
     );
