@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
 import { TextWithLabel } from "./components/Form";
 
-import { Toast } from "./Login";
-
+import Toast from "./components/Toast";
 import {
     Table,
     TableRow,
@@ -179,7 +178,7 @@ function DanhSachCap() {
                 <ModalHeader>Sửa cấp</ModalHeader>
                 <ModalBody>
                     <TextWithLabel
-                        disable={true}
+                        disabled={true}
                         onChange={handleChange}
                         value={inputs.MA_CAP}
                         name="MA_CAP"

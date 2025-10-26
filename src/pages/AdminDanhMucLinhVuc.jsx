@@ -3,8 +3,7 @@ import { HiPlus, HiDownload } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
 import { TextWithLabel } from "./components/Form";
-import { Toast } from "./Login";
-
+import Toast from "./components/Toast";
 import {
     Table,
     TableRow,
@@ -179,7 +178,7 @@ function DanhSachCap() {
                 <ModalHeader>Sửa lĩnh vực</ModalHeader>
                 <ModalBody>
                     <TextWithLabel
-                        disable={true}
+                        disabled={true}
                         onChange={handleChange}
                         value={inputs.MA_LINH_VUC}
                         name="MA_LINH_VUC"

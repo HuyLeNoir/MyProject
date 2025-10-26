@@ -1,6 +1,6 @@
 import "../App.css";
 import { useEffect, useState, useRef } from "react";
-import Pagination from "./components/pagination.jsx";
+import Pagination from "./components/Pagination.jsx";
 import DropDown from "./components/Dropdown.jsx";
 import InputGiangVien from "./components/InputGiangVien.jsx";
 import Table from "./components/AccordionTable.jsx";
@@ -204,7 +204,8 @@ function TableDeTai() {
     function handleFilters() {
         let data = DATA.filter(
             (item) =>
-                (giangVienHD.Name === "" || item.GVHD.toLowerCase() === giangVienHD.Name.toLowerCase()) &&
+                (giangVienHD.Name === "" ||
+                    item.GVHD.toLowerCase() === giangVienHD.Name.toLowerCase()) &&
                 (linhVuc === "" || item.linhVuc === linhVuc) &&
                 (searchValue.trim() === "" ||
                     item.tomTat.toLowerCase().includes(searchValue.trim()) ||
@@ -300,8 +301,7 @@ function TableDeTai() {
                 currentPage={currentPage}
                 renderAmount={Number(NofRowPerPage)}
                 data={tableData}
-            >
-            </Table>
+            ></Table>
             <Pagination
                 setCurrentPage={setCurrentPage}
                 numberOfRows={totalRows}
@@ -315,7 +315,6 @@ function TableDeTai() {
 function DeTai() {
     return (
         <div className="font-display bg-backgroundColor">
-            
             <Main>
                 <TableDeTai></TableDeTai>
             </Main>
@@ -325,4 +324,3 @@ function DeTai() {
 }
 
 export default DeTai;
-

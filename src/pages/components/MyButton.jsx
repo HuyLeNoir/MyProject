@@ -3,8 +3,8 @@ export default function Button({
     IconRight,
     onClick,
     children,
-    size,
-    variant,
+    size = "small",
+    variant = "none",
     className = "",
     ...props
 }) {

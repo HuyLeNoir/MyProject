@@ -3,9 +3,9 @@ import { HiPlus, HiDownload } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
 import { TextWithLabel } from "./components/Form";
-import DropDown from "./components/NewDropdown";
+import DropDown from "./components/Dropdown";
 
-import { Toast } from "./Login";
+import Toast from "./components/Toast";
 
 import {
     Table,
@@ -27,6 +27,8 @@ export default function AdminNguoiDung() {
         PASSWORD: "",
         MSSV: "",
         MACB: "",
+        HOC_VAN: "",
+        ROLE: "",
     };
     const [ToastMessage, setToastMessage] = useState("");
     const [data, setData] = useState([]);
@@ -43,14 +45,18 @@ export default function AdminNguoiDung() {
     const [role, setRole] = useState("");
     const [educationLevel, setEducationLevel] = useState("");
     async function response(res) {
-        if (res.ok) {
-            console.log("status: ok.");
-            const response = await res.json();
-            setToastMessage(response.message);
-            setToastSuccess(response.success);
-            setcreateModal(false);
-        }
+        console.log("responding: ok.");
+        const response = await res.json();
+        console.log(response);
+        setToastMessage(response.message);
+        setToastSuccess(response.success);
+        setcreateModal(false);
         setToastDisplay(true);
+    }
+    function resetInput(initialInput) {
+        setInputs(initialInput);
+        setRole(initialInput.ROLE);
+        setEducationLevel(initialInput.HOC_VAN);
     }
     function handleSelectAll(e) {
         console.log("select all");
@@ -87,10 +93,11 @@ export default function AdminNguoiDung() {
             }
             setData(json);
             //init trang thai select, tranh bi loi control uncontroled element
-            setSelectedRows({}); //tra ve initial cua selectedRows de tranh sau khi xoa thi cac gia tri (prev) tuc la id cu van con
-            json.map((row) => {
-                setSelectedRows((prev) => ({ ...prev, [row.MA_LINH_VUC]: false }));
+            const rows = {};
+            json.forEach((row) => {
+                rows[row.USERID] = false;
             });
+            setSelectedRows(rows);
         } catch (error) {
             console.log("fetch failed");
         }
@@ -148,33 +155,34 @@ export default function AdminNguoiDung() {
                     body: JSON.stringify(inputs),
                 });
                 await response(res);
-                setInputs(initialInput);
-                handleGet();
+                resetInput(initialInput);
+                await handleGet();
             } catch (error) {
                 console.log(error.message);
             }
         }
     }
     async function handleEdit() {
-        const MA_LINH_VUC = editModal;
-        const { TEN_LINH_VUC, MO_TA_LINH_VUC } = inputs;
+        const target = editModal;
+        inputs["ROLE"] = role;
+        inputs["HOC_VAN"] = educationLevel;
         try {
-            const res = fetch(`/api/admin/danhmuc/linhvuc/${MA_LINH_VUC}`, {
+            const res = await fetch(`/api/admin/users/${target}`, {
                 method: "put",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ TEN_LINH_VUC, MO_TA_LINH_VUC }),
+                body: JSON.stringify(inputs),
             });
             await response(res); //thong bao cho nguoi dung
-            handleGet();
+            await handleGet();
         } catch (error) {
             console.log(error.message);
         }
-        setInputs(initialInput);
+        resetInput(initialInput);
         setEditModal(false);
     }
     async function handleDelete(target) {
         try {
-            const res = await fetch(`/api/admin/danhmuc/linhvuc/${target}`, {
+            const res = await fetch(`/api/admin/users/${target}`, {
                 method: "delete",
             });
             await response(res); //thong bao cho nguoi dung
@@ -230,26 +238,24 @@ export default function AdminNguoiDung() {
                             className="min-h-20"
                             fieldName={"Trình độ học vấn"}
                             select={educationLevel}
+                            options={[
+                                "Sinh viên",
+                                "Nghiên cứu sinh",
+                                "Thạc sĩ",
+                                "Tiến sĩ",
+                                "PGS. TS",
+                                "GS. TS",
+                            ]}
                             setSelect={setEducationLevel}
-                        >
-                            <li>Sinh viên</li>
-                            <li>Nghiên cứu sinh</li>
-                            <li>Thạc sĩ</li>
-                            <li>tiến sĩ</li>
-                            <li>PGS.TS</li>
-                            <li>GS.TS</li>
-                        </DropDown>
+                        ></DropDown>
                         <DropDown
                             size="small"
                             className="min-h-20"
                             fieldName={"Chức vụ"}
                             select={role}
+                            options={["SinhVien", "GiangVien", "Admin"]}
                             setSelect={setRole}
-                        >
-                            <li>SinhVien</li>
-                            <li>GiangVien</li>
-                            <li>Admin</li>
-                        </DropDown>
+                        ></DropDown>
                     </div>
                     {role !== "Admin" &&
                         role !== "" &&
@@ -281,7 +287,7 @@ export default function AdminNguoiDung() {
                     <div className="flex justify-end gap-2.5 w-full">
                         <button
                             onClick={() => {
-                                setInputs(initialInput);
+                                resetInput(initialInput);
                                 setcreateModal(false);
                             }}
                             className="cursor-pointer border-b-2 text-textColor2 border-textColor2 text-h5 overflow-visible px-4 py-1 hover:bg-gray-100 transition-all ease-in-out duration-300"
@@ -297,43 +303,102 @@ export default function AdminNguoiDung() {
                     </div>
                 </ModalFooter>
             </Modal>
-
             <Modal show={editModal}>
-                <ModalHeader>Sửa lĩnh vực</ModalHeader>
+                <ModalHeader>Tạo người dùng mới</ModalHeader>
                 <ModalBody>
                     <TextWithLabel
-                        disable={true}
+                        disabled={true}
                         onChange={handleChange}
-                        value={inputs.MA_LINH_VUC}
-                        name="MA_LINH_VUC"
-                        id="MA_LINH_VUC"
+                        value={inputs.USERID}
+                        name="USERID"
+                        id="USERID"
                     >
-                        Mã lĩnh vực
+                        Mã người dùng
+                    </TextWithLabel>
+                    <TextWithLabel
+                        type="password"
+                        onChange={handleChange}
+                        value={inputs.PASSWORD}
+                        name="PASSWORD"
+                        id="PASSWORD"
+                    >
+                        Password
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.TEN_LINH_VUC}
-                        name="TEN_LINH_VUC"
-                        id="TEN_LINH_VUC"
+                        value={inputs.HO_TEN_USER}
+                        name="HO_TEN_USER"
+                        id="HO_TEN_USER"
                     >
-                        Tên lĩnh vực
+                        Họ tên người dùng
                     </TextWithLabel>
-                    <label className="px-2" htmlFor="moTa">
-                        Mô tả
-                    </label>
-                    <textarea
+                    <TextWithLabel onChange={handleChange} value={inputs.SDT} name="SDT" id="SDT">
+                        Số điện thoại
+                    </TextWithLabel>
+                    <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.MO_TA_LINH_VUC}
-                        name="MO_TA_LINH_VUC"
-                        id="MO_TA_LINH_VUC"
-                        className="p-2 w-[100%] h-20 border-secondaryColor border-2 transition-all ease-in-out duration-300 focus:border-primaryColor outline-0"
-                    ></textarea>
+                        value={inputs.EMAIL}
+                        name="EMAIL"
+                        id="EMAIL"
+                    >
+                        Email
+                    </TextWithLabel>
+                    <div className="flex gap-2.5 items-center justify-start">
+                        <DropDown
+                            size="small"
+                            className="min-h-20"
+                            fieldName={"Trình độ học vấn"}
+                            select={educationLevel}
+                            options={[
+                                "Sinh viên",
+                                "Nghiên cứu sinh",
+                                "Thạc sĩ",
+                                "Tiến sĩ",
+                                "PGS. TS",
+                                "GS. TS",
+                            ]}
+                            setSelect={setEducationLevel}
+                        ></DropDown>
+                        <DropDown
+                            size="small"
+                            className="min-h-20"
+                            fieldName={"Chức vụ"}
+                            select={role}
+                            options={["SinhVien", "GiangVien", "Admin"]}
+                            setSelect={setRole}
+                        ></DropDown>
+                    </div>
+                    {role !== "Admin" &&
+                        role !== "" &&
+                        (role == "SinhVien" ? (
+                            <div className="SinhVien">
+                                <TextWithLabel
+                                    onChange={handleChange}
+                                    value={inputs.MSSV}
+                                    name="MSSV"
+                                    id="MSSV"
+                                >
+                                    MSSV
+                                </TextWithLabel>
+                            </div>
+                        ) : (
+                            <div className="GiangVien">
+                                <TextWithLabel
+                                    onChange={handleChange}
+                                    value={inputs.MACB}
+                                    name="MACB"
+                                    id="MACB"
+                                >
+                                    MACB
+                                </TextWithLabel>
+                            </div>
+                        ))}
                 </ModalBody>
                 <ModalFooter>
                     <div className="flex justify-end gap-2.5 w-full">
                         <button
                             onClick={() => {
-                                setInputs(initialInput);
+                                resetInput(initialInput);
                                 setEditModal(false);
                             }}
                             className="cursor-pointer border-b-2 text-textColor2 border-textColor2 text-h5 overflow-visible px-4 py-1 hover:bg-gray-100 transition-all ease-in-out duration-300"
@@ -341,7 +406,9 @@ export default function AdminNguoiDung() {
                             Close
                         </button>
                         <button
-                            onClick={handleEdit}
+                            onClick={() => {
+                                handleEdit();
+                            }}
                             className="cursor-pointer border-b-2 text-white bg-primaryColor text-h5 overflow-visible px-4 py-1 hover:bg-blue-900 transition-all ease-in-out duration-300"
                         >
                             Edit
@@ -450,6 +517,9 @@ export default function AdminNguoiDung() {
                                     onClick={() => {
                                         setEditModal(row.USERID);
                                         setInputs(row);
+                                        row.MACB === null ? (row.MACB = "") : (row.MSSV = "");
+                                        setRole(row.ROLE);
+                                        setEducationLevel(row.HOC_VAN);
                                     }}
                                     className="hover:underline hover:cursor-pointer"
                                 >

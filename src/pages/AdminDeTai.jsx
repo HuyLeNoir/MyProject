@@ -1,7 +1,6 @@
 import MyButton from "./components/MyButton";
-import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload } from "react-icons/hi";
-import { useEffect, useState } from "react";
-import DropDown from "./components/NewDropdown";
+import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } from "react-icons/hi";
+import { useEffect, useState, createContext, useContext } from "react";
 import { Outlet, useParams, Link } from "react-router-dom";
 import { TextWithLabel, OnlyText } from "./components/Form";
 import {
@@ -13,17 +12,44 @@ import {
     TableBody,
     CheckBox,
 } from "./components/TableOverhaul";
-import NewDropDown from "./components/NewDropdown";
+import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
+import DropDown from "./components/Dropdown";
 import TextInput from "./components/InputGiangVien";
+import Pagination from "./components/Pagination";
+export const DeTaiContext = createContext();
 
 export function EditDeTai() {
     const { id } = useParams();
     return <div></div>;
 }
 export function NewDeTai() {
+    //test data
+    const sinhVienFromData = [
+        { MSSV: "B0000001", NAME: "Nguyễn Văn An" },
+        { MSSV: "B0000002", NAME: "Trần Thị Bình" },
+        { MSSV: "B0000003", NAME: "Lê Quang Dũng" },
+        { MSSV: "B0000004", NAME: "Phạm Thị Hương" },
+        { MSSV: "B0000005", NAME: "Hoàng Văn Khoa" },
+        { MSSV: "B0000006", NAME: "Đỗ Thị Lan" },
+        { MSSV: "B0000007", NAME: "Vũ Minh Tuấn" },
+        { MSSV: "B0000008", NAME: "Ngô Thị Mai" },
+        { MSSV: "B0000009", NAME: "Trịnh Văn Long" },
+        { MSSV: "B0000010", NAME: "Phan Thị Hạnh" },
+    ];
+    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc } = useContext(DeTaiContext);
     const [giangVien, setGiangVien] = useState({ Name: "", MSCB: "" });
-    const [linhVuc, setLinhVuc] = useState();
-    const [capDeTai, setCapDeTai] = useState();
+    const [chuNhiem, setChuNhiem] = useState("");
+    const [member, setMember] = useState("");
+    const [members, setMembers] = useState([]);
+    const [inputs, setInputs] = useState({});
+    useEffect(() => {
+        inputs["GVHD"] = giangVien || "";
+        inputs["CHU_NHIEM"] = chuNhiem || "";
+        inputs["MA_CAP"] = capDeTai || "";
+        inputs["MA_LINH_VUC"] = linhVuc || "";
+        inputs["MEMBERS"] = members || [];
+        console.log(inputs);
+    }, [chuNhiem, giangVien, capDeTai, linhVuc, members]);
     const giangVienKHMT = [
         { Name: "Mã Trường Thành", MSCB: "002937" },
         { Name: "Võ Trí Thức", MSCB: "002483" },
@@ -39,6 +65,20 @@ export function NewDeTai() {
         { Name: "Phạm Nguyên Hoàng", MSCB: "002640" },
         { Name: "Huỳnh Ngọc Thái Anh", MSCB: "002854" },
     ];
+    function handleChange(e) {
+        const name = e.target.name;
+        const value = e.target.value;
+        setInputs((prev) => ({ ...prev, [name]: value }));
+    }
+    function handleMemberChange(e) {
+        setMember(e.target.value);
+    }
+    function handleAddMember() {
+        const sinhvien = sinhVienFromData.find((sinhvien) => sinhvien.MSSV == member);
+        console.log(sinhvien);
+        setMembers((prev) => [...prev, sinhvien]);
+        setMember("");
+    }
     return (
         <>
             <div className="flex gap-2.5 justify-left items-center">
@@ -50,41 +90,101 @@ export function NewDeTai() {
                 <h1 className="text-h2 font-semibold my-2.5">Thêm một đề tài mới</h1>
             </div>
             <div className="relative bg-white p-5 shadow-md border-1 flex flex-col items-start gap-2.5 border-gray-200">
-                <TextWithLabel name={"tenDeTai"} className="w-200" id="tenDeTai">
+                <TextWithLabel
+                    name="ID_DETAI"
+                    className="w-150"
+                    id="ID_DETAI"
+                    value={inputs.ID_DETAI || ""}
+                    onChange={handleChange}
+                >
+                    Mã đề tài
+                </TextWithLabel>
+                <TextWithLabel
+                    value={inputs.TEN_DETAI || ""}
+                    onChange={handleChange}
+                    name="TEN_DETAI"
+                    className="w-150"
+                    id="TEN_DETAI"
+                >
                     Tên đề tài
                 </TextWithLabel>
-                <div className="flex gap-2.5">
-                    <NewDropDown size="medium" fieldName={"Lĩnh vực"}>
-                        <li>Y tế</li>
-                        <li>Kinh tế</li>
-                        <li>Văn hoá</li>
-                        <li>Giáo dục</li>
-                    </NewDropDown>
-                    <NewDropDown size="medium" fieldName={"Cấp đề tài"}>
+                <div className="flex px-2 gap-2.5">
+                    <DropDown
+                        size="medium"
+                        fieldName={"Lĩnh vực"}
+                        options={["Y tế", "Kinh tế", "Văn hoá", "Giáo dục"]}
+                        select={linhVuc}
+                        setSelect={setLinhVuc}
+                    ></DropDown>
+                    <DropDown
+                        size="medium"
+                        fieldName={"Cấp đề tài"}
+                        options={["Cấp sinh viên", "Cấp trường", "Cấp địa phương", "Cấp nhà nước"]}
+                        select={capDeTai}
+                        setSelect={setCapDeTai}
+                    >
                         <li>Cấp sinh viên</li>
                         <li>Cấp trường</li>
                         <li>Cấp địa phương</li>
                         <li>Cấp nhà nước</li>
-                    </NewDropDown>
+                    </DropDown>
+                    <TextInput
+                        giangVien={giangVien}
+                        setGiangVien={setGiangVien}
+                        users={giangVienKHMT}
+                        fieldName={"Giảng viên hướng dẫn"}
+                    ></TextInput>
                 </div>
-                <TextInput
-                    giangVien={giangVien}
-                    setGiangVien={setGiangVien}
-                    users={giangVienKHMT}
-                    fieldName={"Giảng viên hướng dẫn"}
-                ></TextInput>
                 <div className="flex gap-2.5 items-center justify-center">
-                    <TextWithLabel id="chuNhiem" placeHolder="Nhập MSSV để thêm">
-                        Chủ nhiệm đề tài
+                    <TextWithLabel
+                        id="member"
+                        value={member || ""}
+                        name="member"
+                        onChange={handleMemberChange}
+                        placeHolder="Nhập MSSV để thêm"
+                    >
+                        Thành viên tham gia
                     </TextWithLabel>
-                    {/* FIX THIS */}
-                    <button className="bg-buttonColor flex items-center justify-center rounded-true aspect-square cursor-pointer hover:shadow-xs h-10">
+
+                    <button
+                        onClick={handleAddMember}
+                        className="bg-buttonColor flex items-center justify-center rounded-true aspect-square cursor-pointer hover:shadow-xs h-10"
+                    >
                         <HiPlus size={24} />
                     </button>
                 </div>
-                <ul>
-                    <label htmlFor=""></label>
-                </ul>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeadCell>STT</TableHeadCell>
+                            <TableHeadCell>Họ và tên</TableHeadCell>
+                            <TableHeadCell>MSSV</TableHeadCell>
+                            <TableHeadCell>Tuỳ chọn</TableHeadCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell>1</TableCell>
+                            <TableCell>Lê Phan Nhật Huy</TableCell>
+                            <TableCell>B2303860</TableCell>
+                            <TableCell>
+                                <MyButton
+                                    IconLeft={<HiTrash size={24} className="text-redWarning" />}
+                                ></MyButton>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+                <DropDown
+                    size="large"
+                    options={members.reduce((acc, member) => {
+                        acc.push(member.MSSV + " - " + member.NAME);
+                        return acc;
+                    }, [])}
+                    select={chuNhiem}
+                    setSelect={setChuNhiem}
+                    fieldName={"Chủ nhiệm đề tài"}
+                ></DropDown>
                 <label htmlFor="tomtat">Tóm tắt đề tài</label>
                 <textarea
                     name="tomtat"
@@ -96,11 +196,15 @@ export function NewDeTai() {
     );
 }
 export function DanhSachDeTai() {
+    const [data, setData] = useState([]);
+    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc } = useContext(DeTaiContext);
     const [searchValue, setSearchValue] = useState("");
     const [filterIsOpen, setFilterIsOpen] = useState(false);
-    const [capDeTai, setCapDeTai] = useState();
+    const [confirmModal, setDisplayConfirmModal] = useState(false);
+    //paginatioon
+    const [currentPage, setCurrentPage] = useState(0);
+    const [rowPerPage, setRowPerPage] = useState(5);
     const [selectedRows, setSelectedRows] = useState({ DT01: false, DT02: false });
-    const [linhVuc, setLinhVuc] = useState();
     function handleChange(e) {
         setSearchValue(e.target.value);
     }
@@ -138,11 +242,42 @@ export function DanhSachDeTai() {
 
     return (
         <>
+            <Modal show={confirmModal}>
+                <ModalHeader>Are You sure?</ModalHeader>
+                <ModalBody></ModalBody>
+                <ModalFooter>
+                    <div className="flex justify-end gap-2.5 w-full">
+                        <button
+                            onClick={() => {
+                                setDisplayConfirmModal(false);
+                            }}
+                            className="cursor-pointer border-b-2 text-textColor2 border-textColor2 text-h5 overflow-visible px-4 py-1 hover:bg-gray-100 transition-all ease-in-out duration-300"
+                        >
+                            Close
+                        </button>
+                        <button
+                            onClick={() => {
+                                let targets = Object.entries(selectedRows).filter(
+                                    ([key, value]) => value == true //loc ra cac row ma selected la true
+                                ); //chuyen thanh obj
+                                targets.forEach(([key]) => {
+                                    handleDelete(key);
+                                    setDisplayConfirmModal(false);
+                                });
+                            }}
+                            className="cursor-pointer border-b-2 text-white bg-primaryColor text-h5 overflow-visible px-4 py-1 hover:bg-blue-900 transition-all ease-in-out duration-300"
+                        >
+                            Yippy!
+                        </button>
+                    </div>
+                </ModalFooter>
+            </Modal>
+
             <h1 className="text-h2 font-semibold my-2.5">Danh sách đề tài</h1>
             <div className="relative bg-white p-5 rounded-lg">
                 <div className="TableControl grid grid-cols-8 gap-5">
                     <div className="col-span-3 flex justify-center items-center">
-                        <span className=" h-[42px] bg-buttonColor aspect-square flex justify-center items-center rounded-bl-md rounded-tl-md text-textColor2">
+                        <span className=" h-full bg-buttonColor aspect-square flex justify-center items-center rounded-bl-md rounded-tl-md text-textColor2">
                             <HiSearch size={24}></HiSearch>
                         </span>
                         <OnlyText
@@ -150,6 +285,7 @@ export function DanhSachDeTai() {
                             name={"searchBar"}
                             id={"searchBar"}
                             onChange={handleChange}
+                            className="h-full"
                             value={searchValue}
                             placeHolder={"Mã hoặc tên đề tài"}
                         ></OnlyText>
@@ -194,21 +330,20 @@ export function DanhSachDeTai() {
                             select={capDeTai}
                             setSelect={setCapDeTai}
                             fieldName={"Cấp đề tài"}
-                        >
-                            <li>Cấp sinh viên</li>
-                            <li>Cấp địa phương</li>
-                            <li>Cấp trường</li>
-                        </DropDown>
+                            options={[
+                                "Cấp sinh viên",
+                                "Cấp trường",
+                                "Cấp địa phương",
+                                "Cấp nhà nước",
+                            ]}
+                        ></DropDown>
                         <DropDown
                             className="min-w-40"
                             select={linhVuc}
                             setSelect={setLinhVuc}
+                            options={["Y tế", "Kinh tế", "Văn hoá", "Giáo dục"]}
                             fieldName={"Lĩnh vực đề tài"}
-                        >
-                            <li>Kinh tế</li>
-                            <li>Y tế</li>
-                            <li>Giáo dục</li>
-                        </DropDown>
+                        ></DropDown>
                         <MyButton
                             onClick={handleFilter}
                             size={"small"}
@@ -235,6 +370,9 @@ export function DanhSachDeTai() {
                     </span>
                     <MyButton
                         className={"border-1 px-2 py-1 text-h6 border-redWarning text-redWarning"}
+                        onClick={() => {
+                            setDisplayConfirmModal(true);
+                        }}
                     >
                         Xoá đã chọn
                     </MyButton>
@@ -245,10 +383,10 @@ export function DanhSachDeTai() {
                             <TableHeadCell>
                                 <CheckBox onChange={handleSelectAll}></CheckBox>
                             </TableHeadCell>
-                            <TableHeadCell>Mã đề tài</TableHeadCell>
+                            <TableHeadCell className="w-[15%]">Mã đề tài</TableHeadCell>
                             <TableHeadCell className="text-left">Tên</TableHeadCell>
-                            <TableHeadCell className="text-center">Cấp</TableHeadCell>
-                            <TableHeadCell className="text-center">Lĩnh vực</TableHeadCell>
+                            <TableHeadCell className="w-[15%] text-center">Cấp</TableHeadCell>
+                            <TableHeadCell className="w-[15%] text-center">Lĩnh vực</TableHeadCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -263,7 +401,7 @@ export function DanhSachDeTai() {
                             </TableCell>
                             <TableCell className="text-center">DT01</TableCell>
                             <TableCell className="hover:underline hover:cursor-pointer">
-                                <Link to="/Admin/DeTai/Edit/DT01">
+                                <Link to="edit/DT01">
                                     Đánh giá trình độ và năng lực công nghệ sản xuất của doanh
                                     nghiệp và các ngành, lĩnh vực sản xuất trên địa bàn thành phố
                                     Cần Thơ
@@ -291,14 +429,27 @@ export function DanhSachDeTai() {
                         </TableRow>
                     </TableBody>
                 </Table>
+                <Pagination
+                    setCurrentPage={setCurrentPage}
+                    select={rowPerPage}
+                    setSelect={setRowPerPage}
+                ></Pagination>
             </div>
+            <Toast
+                ToastDisplay={ToastDisplay}
+                ToastMessage={ToastMessage}
+                ToastSuccess={ToastSuccess}
+                SetToastDisplay={setToastDisplay}
+            ></Toast>
         </>
     );
 }
 export function DeTai() {
+    const [capDeTai, setCapDeTai] = useState();
+    const [linhVuc, setLinhVuc] = useState();
     return (
-        <>
-            <Outlet></Outlet>
-        </>
+        <DeTaiContext.Provider value={{ capDeTai, setCapDeTai, linhVuc, setLinhVuc }}>
+            <Outlet />
+        </DeTaiContext.Provider>
     );
 }
