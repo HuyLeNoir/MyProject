@@ -1,4 +1,4 @@
-import Header from "./components/header";
+import Header from "../components/header.jsx";
 import { Outlet, Link } from "react-router-dom";
 import { HiChevronDown } from "react-icons/hi";
 import { useState } from "react";
@@ -31,10 +31,10 @@ function NavItem({ children }) {
 export default function Admin() {
     const [open, setOpen] = useState(false);
     return (
-        <div className="text-textColor1 font-display overflow-x-hidden">
+        <div className="text-textColor1 font-display h-screen bg-backgroundColor overflow-x-hidden">
             <Header></Header>
-            <div className="Wrapper h-screen grid grid-cols-10 px-10 py-5 gap-5 bg-backgroundColor">
-                <nav className="col-span-2 flex flex-col gap-1">
+            <div className="Wrapper grid grid-cols-10 px-10 py-5 gap-5">
+                <nav className="col-span-2 h-full flex bg-white flex-col gap-1">
                     <NavItem>
                         <Link to="dashboard">Dashboard</Link>
                     </NavItem>

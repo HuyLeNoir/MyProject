@@ -1,9 +1,9 @@
-import logo1 from "./pagesAssets/logo1.png";
+import logo1 from "../assets/logo1.png";
 import { HiUser, HiLockClosed } from "react-icons/hi";
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../App";
-import Toast from "./components/Toast";
+import { UserContext } from "../context/Context";
+import Toast from "../components/Toast";
 export function TextInput({ value, IconLeft, IconRight, onChange, placeHolder, name, id, type }) {
     return (
         <div className="flex w-full gap-4 items-center border-b-2 border-secondaryColor hover:border-ctuColor1 focus-within:border-ctuColor1 transition-all ease-in-out duration-500">
@@ -44,15 +44,19 @@ function Login() {
         if (res.ok) {
             const response = await res.json();
             setToastMessage(response.message);
-            console.log(response.message);
+            console.log(response);
             setToastSuccess(response.success);
 
             if (response.success) {
                 localStorage.setItem("user", JSON.stringify(response.body));
-                setUser(response.body);
+                console.log(response.body.token);
+                setUser(response.body.userData);
                 setTimeout(() => {
-                    navigate("/detais");
-                }, 5000);
+                    if (response.body.ROLE != "Admin") {
+                        navigate("/detais");
+                    }
+                    navigate("/admin");
+                }, 2000);
             }
         }
         SetToastDisplay(true);

@@ -1,13 +1,13 @@
 import "../App.css";
 import { useEffect, useState, useRef } from "react";
-import Pagination from "./components/pagination.jsx";
-import DropDown from "./components/Dropdown.jsx";
-import AccordionTable from "./components/AccordionTable.jsx";
-import Search from "./components/Search.jsx";
-import NavigationBar from "./components/removed/NavBar.jsx";
-import MyButton from "./components/MyButton.jsx";
-import Header from "./components/header.jsx";
-import Footer from "./components/Footer.jsx";
+import Pagination from "../components/Pagination.jsx";
+import DropDown from "../components/Dropdown.jsx";
+import AccordionTable from "../components/AccordionTable.jsx";
+import Search from "../components/Search.jsx";
+import NavigationBar from "../components/removed/NavBar.jsx";
+import MyButton from "../components/MyButton.jsx";
+import Header from "../components/header.jsx";
+import Footer from "../components/Footer.jsx";
 
 //TODO: normalize table for reuseable purpose
 
@@ -42,12 +42,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao01",
@@ -73,12 +68,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao02",
@@ -89,8 +79,7 @@ function TableBaiBao() {
             file: "Click me :)",
             //detailed
             tomTat: "Nghiên cứu được thực hiện nhằm xác định tương quan giữa đặc tính lý hóa học đất với màu sắc đất tại tỉnh Vĩnh Long. Số liệu phân tích 50 mẫu đất được kế thừa gồm: so màu sắc đất bằng hệ thống màu Munsell và 12 chỉ tiêu lý hóa học đất. Kết quả cho thấy, đất khu vực nghiên cứu rất giàu dinh dưỡng, đặc biệt là chất hữu cơ và đạm với sắc đất (Hue) là (2,5Y; 7,5YR; 10YR), độ sáng (Value) từ 2 đến 6, ở mức trung bình đến cao, độ tinh khiết (Chroma) chủ yếu là mức 1, đất màu sẫm. Tương quan tuyến tính được phân tích và xác định được 17 cặp đặc tính đất có tương quan tuyến tính với màu sắc đất  bao gồm % cát, % thịt, % sét, pH(H2O), pH(KCl), và hàm lượng chất hữu cơ (CHC), trong đó mối tương quan cao nhất là giữa CHC với Value khi Hue là 10 YR. Các mối tương quan này có thể ước đoán được một số chỉ tiêu thổ nhưỡng từ dữ liệu so màu đất, từ đó giảm thiểu chi phí và thời gian phân tích. Tuy nhiên, màu sắc đất thường bị ảnh hưởng bởi các yếu tố khác như ẩm độ, thành phần cơ giới, hàm lượng chất hữu cơ, nguồn ánh sáng và mức độ chính xác khi so màu.",
-            keywords:
-                "Lý-hóa học đất, màu sắc đất, tương quan, tỉnh Vĩnh Long",
+            keywords: "Lý-hóa học đất, màu sắc đất, tương quan, tỉnh Vĩnh Long",
             emailLienHe: "abcxyz@ctu.edu.vn",
             tenTapChi: "",
             tenHoiThao: "Hội thảo khoa học Đại Học Cần Thơ",
@@ -103,16 +92,12 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao03",
-            tenBaiBao: "Đánh giá khả năng cung cấp oxy hòa tan vào trong nước thải bằng ống venturi",
+            tenBaiBao:
+                "Đánh giá khả năng cung cấp oxy hòa tan vào trong nước thải bằng ống venturi",
             loaiBaiBao: "Tạp chí khoa học",
             namCongBo: "2025",
             tacGia: "Phan Xuân Lợi và Kim Lavane",
@@ -133,24 +118,19 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao04",
-            tenBaiBao: "Đặc điểm hoá lý của vật liệu chitosan, biochar và vật liệu tổ hợp chitosan - biochar và ứng dụng trong xử lý Metyl Orange trong dung dịch",
+            tenBaiBao:
+                "Đặc điểm hoá lý của vật liệu chitosan, biochar và vật liệu tổ hợp chitosan - biochar và ứng dụng trong xử lý Metyl Orange trong dung dịch",
             loaiBaiBao: "Hội thảo khoa học",
             namCongBo: "2023",
             tacGia: "Đỗ Thị Mỹ Phượng, Lê Chi Mai và Nguyễn Xuân Lộc",
             file: "Click me :)",
             //detailed
             tomTat: "Đặc tính bề mặt và thành phần hóa học của ba loại vật liệu được so sánh trong nghiên cứu bao gồm: chitosan từ vỏ tôm, biochar từ vỏ trấu và vật liệu tổng hợp chitosan-biochar nhằm đánh giá các đặc tính lý hóa của chúng. Các phương pháp phân tích bao gồm SEM để quan sát cấu trúc bề mặt, EDX để xác định thành phần hóa học, BET để đo diện tích bề mặt và FT-IR để xác định các nhóm chức hóa học. Kết quả cho thấy diện tích bề mặt BET của chitosan-biochar (108,0 m²/g) thấp hơn biochar (115,6 m²/g) nhưng cao hơn chitosan (9,86 m²/g). Tất cả các vật liệu đều có bề mặt xốp với bán kính lỗ rỗng trung bình từ 2,26 nm đến 2,34 nm. Phổ EDX cho thấy chitosan chủ yếu chứa C và O, trong khi chitosan-biochar còn có Si và N. FT-IR xác nhận sự hiện diện của nhóm chức C–N và N–H ở chitosan-biochar, trong khi biochar có thêm nhóm C=C, C–O–C, Si–O–Si. SEM chỉ ra chitosan và chitosan-biochar có bề mặt vô định hình, trong khi biochar có cấu trúc lỗ xốp. Thí nghiệm hấp phụ Methyl Orange cho thấy chitosan-biochar hiệu quả hơn trong loại bỏ MO ở pH ~3, khối lượng",
-            keywords:
-                "Biochar, chitosan, chitosan–biochar, Metyl Orange, vỏ tôm, vỏ trấu",
+            keywords: "Biochar, chitosan, chitosan–biochar, Metyl Orange, vỏ tôm, vỏ trấu",
             emailLienHe: "abcxyz@ctu.edu.vn",
             tenTapChi: "",
             tenHoiThao: "Hội thảo khoa học công nghệ Đại học Cần Thơ",
@@ -163,12 +143,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao05",
@@ -179,10 +154,8 @@ function TableBaiBao() {
             tacGia: "Tạ Thanh Hồng, Võ Thành Khang, Nguyễn Quốc Châu Thanh và Nguyễn Trọng Tuân",
             file: "Click me :)",
             //detailed
-            tomTat: 
-            "Nắp ấm hoa đôi (Nepenthes mirabilis) hay còn gọi là bình nước kỳ quan, thuộc họ Nắp ấm (Nepenthaceae), là một loài thực vật ít phổ biến, vùng phân bố hẹp và thành phần hóa học chịu ảnh hưởng bởi nguồn dinh dưỡng từ động vật mà chúng tiêu thụ được. Trong nghiên cứu này, việc phân lập thành công các hợp chất đã được thực hiện bằng kỹ thuật sắc ký cột cổ điển từ loài Nắp ấm hoa đôi sinh trưởng ở đảo Phú Quốc, tỉnh Kiên Giang, Việt Nam. Các phương pháp phân tích dữ liệu phổ nghiệm hiện đại được áp dụng như phổ cộng hưởng từ hạt nhân (NMR), phổ khối lượng (ESI-MS và HR-ESI-MS) và phổ hồng ngoại (FT-IR). Bên cạnh đó, cấu trúc của các hợp chất béo mạch dài lần đầu tiên được phân lập từ họ cây Nepenthaceae (họ Nắp ấm) cũng đã được xác định trong nghiên cứu gồm: phytyl hexadecanoate (1), glyceryl-1-tetracosanoate (2) và behenyl alcohol (3). Ngoài ra, việc phân lập đã được tiến hành và xác định được cấu trúc một hợp chất thuộc nhóm triterpenoids là lupenone (4).",
-            keywords:
-                "Chất béo, mạch dài, Nắp ấm, phân lập, Phú Quốc",
+            tomTat: "Nắp ấm hoa đôi (Nepenthes mirabilis) hay còn gọi là bình nước kỳ quan, thuộc họ Nắp ấm (Nepenthaceae), là một loài thực vật ít phổ biến, vùng phân bố hẹp và thành phần hóa học chịu ảnh hưởng bởi nguồn dinh dưỡng từ động vật mà chúng tiêu thụ được. Trong nghiên cứu này, việc phân lập thành công các hợp chất đã được thực hiện bằng kỹ thuật sắc ký cột cổ điển từ loài Nắp ấm hoa đôi sinh trưởng ở đảo Phú Quốc, tỉnh Kiên Giang, Việt Nam. Các phương pháp phân tích dữ liệu phổ nghiệm hiện đại được áp dụng như phổ cộng hưởng từ hạt nhân (NMR), phổ khối lượng (ESI-MS và HR-ESI-MS) và phổ hồng ngoại (FT-IR). Bên cạnh đó, cấu trúc của các hợp chất béo mạch dài lần đầu tiên được phân lập từ họ cây Nepenthaceae (họ Nắp ấm) cũng đã được xác định trong nghiên cứu gồm: phytyl hexadecanoate (1), glyceryl-1-tetracosanoate (2) và behenyl alcohol (3). Ngoài ra, việc phân lập đã được tiến hành và xác định được cấu trúc một hợp chất thuộc nhóm triterpenoids là lupenone (4).",
+            keywords: "Chất béo, mạch dài, Nắp ấm, phân lập, Phú Quốc",
             emailLienHe: "abcxyz@ctu.edu.vn",
             tenTapChi: "",
             tenHoiThao: "Hội thảo khoa học công nghệ Đại học Cần Thơ",
@@ -195,12 +168,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao06",
@@ -226,12 +194,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao07",
@@ -257,12 +220,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao08",
@@ -288,12 +246,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao09",
@@ -319,12 +272,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
         {
             maBaiBao: "baibao10",
@@ -350,12 +298,7 @@ function TableBaiBao() {
                 "Balakrishnan, N. (1993). Simple heuristics for the vehicle routeing problem with soft time windows. Journal of the Operational Research Society, 44(3), 279-287.",
                 "Dantzig, G. B., & Ramser, J. H. (1959). The truck dispatching problem. Management science, 6(1), 80-91.",
             ],
-            cacDeTaiLienQuan: [
-                "DeTai1",
-                "DeTai2",
-                "DeTai3",
-                "DeTai4",
-            ],
+            cacDeTaiLienQuan: ["DeTai1", "DeTai2", "DeTai3", "DeTai4"],
         },
     ];
     const Theads = [
@@ -476,8 +419,7 @@ function TableBaiBao() {
                 currentPage={currentPage}
                 renderAmount={Number(NofRowPerPage)}
                 data={tableData}
-            >
-            </AccordionTable>
+            ></AccordionTable>
             <Pagination
                 setCurrentPage={setCurrentPage}
                 numberOfRows={totalRows}

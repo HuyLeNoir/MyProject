@@ -1,8 +1,13 @@
-import MyButton from "./components/MyButton";
+import MyButton from "../components/MyButton.jsx";
+import { Datepicker } from "flowbite-react";
+import { getCap } from "../services/Services.js";
+import { formatDateLocal } from "../util/util.js";
 import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } from "react-icons/hi";
 import { useEffect, useState, createContext, useContext } from "react";
 import { Outlet, useParams, Link } from "react-router-dom";
-import { TextWithLabel, OnlyText } from "./components/Form";
+import { TextWithLabel, OnlyText } from "../components/Form.jsx";
+import { GlobalContext } from "../context/Context.jsx";
+import Toast from "../components/Toast.jsx";
 import {
     Table,
     TableRow,
@@ -11,12 +16,12 @@ import {
     TableHead,
     TableBody,
     CheckBox,
-} from "./components/TableOverhaul";
-import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
-import DropDown from "./components/Dropdown";
-import TextInput from "./components/InputGiangVien";
-import Pagination from "./components/Pagination";
-export const DeTaiContext = createContext();
+} from "../components/TableOverhaul.jsx";
+import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal.jsx";
+import DropDown from "../components/Dropdown.jsx";
+import TextInput from "../components/InputGiangVien.jsx";
+import Pagination from "../components/Pagination.jsx";
+import { DeTaiContext } from "../context/Context.jsx";
 
 export function EditDeTai() {
     const { id } = useParams();
@@ -25,6 +30,7 @@ export function EditDeTai() {
 export function NewDeTai() {
     //test data
     const sinhVienFromData = [
+        //fetch
         { MSSV: "B0000001", NAME: "Nguyễn Văn An" },
         { MSSV: "B0000002", NAME: "Trần Thị Bình" },
         { MSSV: "B0000003", NAME: "Lê Quang Dũng" },
@@ -37,34 +43,51 @@ export function NewDeTai() {
         { MSSV: "B0000010", NAME: "Phan Thị Hạnh" },
     ];
     const { capDeTai, setCapDeTai, linhVuc, setLinhVuc } = useContext(DeTaiContext);
-    const [giangVien, setGiangVien] = useState({ Name: "", MSCB: "" });
+    const [giangVien, setGiangVien] = useState({ Name: "", MACB: "" });
     const [chuNhiem, setChuNhiem] = useState("");
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
     const [member, setMember] = useState("");
-    const [members, setMembers] = useState([]);
+    const [members, setMembers] = useState({});
     const [inputs, setInputs] = useState({});
     useEffect(() => {
         inputs["GVHD"] = giangVien || "";
-        inputs["CHU_NHIEM"] = chuNhiem || "";
+        inputs["CHU_NHIEM"] = chuNhiem.split(" - ")[0] || "";
         inputs["MA_CAP"] = capDeTai || "";
         inputs["MA_LINH_VUC"] = linhVuc || "";
         inputs["MEMBERS"] = members || [];
+        inputs["NGAYBD"] = formatDateLocal(startDate);
+        inputs["NGAYKT"] = formatDateLocal(endDate);
+    }, [chuNhiem, giangVien, capDeTai, linhVuc, members, startDate, endDate]);
+    function handleSubmit() {
         console.log(inputs);
-    }, [chuNhiem, giangVien, capDeTai, linhVuc, members]);
+    }
     const giangVienKHMT = [
-        { Name: "Mã Trường Thành", MSCB: "002937" },
-        { Name: "Võ Trí Thức", MSCB: "002483" },
-        { Name: "Trần Nguyễn Minh Thư", MSCB: "002635" },
-        { Name: "Trần Việt Châu", MSCB: "002692" },
-        { Name: "Phạm Nguyên Khang", MSCB: "001348" },
-        { Name: "Lê Quyết Thắng", MSCB: "000509" },
-        { Name: "Lưu Tiến Đạo", MSCB: "002805" },
-        { Name: "Phạm Xuân Hiền", MSCB: "001707" },
-        { Name: "Trần Nguyễn Dương Chi", MSCB: "002684" },
-        { Name: "Phan Bích Chung", MSCB: "002265" },
-        { Name: "Nguyễn Bá Diệp", MSCB: "002484" },
-        { Name: "Phạm Nguyên Hoàng", MSCB: "002640" },
-        { Name: "Huỳnh Ngọc Thái Anh", MSCB: "002854" },
+        { Name: "Mã Trường Thành", MACB: "002937" },
+        { Name: "Võ Trí Thức", MACB: "002483" },
+        { Name: "Trần Nguyễn Minh Thư", MACB: "002635" },
+        { Name: "Trần Việt Châu", MACB: "002692" },
+        { Name: "Phạm Nguyên Khang", MACB: "001348" },
+        { Name: "Lê Quyết Thắng", MACB: "000509" },
+        { Name: "Lưu Tiến Đạo", MACB: "002805" },
+        { Name: "Phạm Xuân Hiền", MACB: "001707" },
+        { Name: "Trần Nguyễn Dương Chi", MACB: "002684" },
+        { Name: "Phan Bích Chung", MACB: "002265" },
+        { Name: "Nguyễn Bá Diệp", MACB: "002484" },
+        { Name: "Phạm Nguyên Hoàng", MACB: "002640" },
+        { Name: "Huỳnh Ngọc Thái Anh", MACB: "002854" },
     ];
+    function resetInput() {
+        setInputs({});
+        setLinhVuc("");
+        setCapDeTai("");
+        setGiangVien({ Name: "", MACB: "" });
+        setMember("");
+        setMembers({});
+        setChuNhiem("");
+        setStartDate(null);
+        setEndDate(null);
+    }
     function handleChange(e) {
         const name = e.target.name;
         const value = e.target.value;
@@ -73,11 +96,18 @@ export function NewDeTai() {
     function handleMemberChange(e) {
         setMember(e.target.value);
     }
+    useEffect(() => {
+        console.log(members);
+    }, [members]);
     function handleAddMember() {
         const sinhvien = sinhVienFromData.find((sinhvien) => sinhvien.MSSV == member);
-        console.log(sinhvien);
-        setMembers((prev) => [...prev, sinhvien]);
-        setMember("");
+        if (!sinhvien) {
+            alert("Khong tim thay sinh vien");
+            return;
+        }
+        setMembers((prev) => ({ ...prev, [sinhvien.MSSV]: sinhvien.NAME }));
+
+        setMember(""); //reset lai input
     }
     return (
         <>
@@ -153,7 +183,7 @@ export function NewDeTai() {
                         <HiPlus size={24} />
                     </button>
                 </div>
-                <Table>
+                <Table className="w-150">
                     <TableHead>
                         <TableRow>
                             <TableHeadCell>STT</TableHeadCell>
@@ -163,34 +193,110 @@ export function NewDeTai() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        <TableRow>
-                            <TableCell>1</TableCell>
-                            <TableCell>Lê Phan Nhật Huy</TableCell>
-                            <TableCell>B2303860</TableCell>
-                            <TableCell>
-                                <MyButton
-                                    IconLeft={<HiTrash size={24} className="text-redWarning" />}
-                                ></MyButton>
-                            </TableCell>
-                        </TableRow>
+                        {Object.entries(members).map(([MSSV, NAME], index) => (
+                            <TableRow key={index}>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>{NAME}</TableCell>
+                                <TableCell>{MSSV}</TableCell>
+                                <TableCell>
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <MyButton
+                                            // onClick={() => {
+                                            //     const newMembers = { ...members };
+                                            //     console.log(MSSV);
+                                            //     delete newMembers[MSSV];
+                                            //     setMembers(newMembers);
+                                            // }}
+                                            IconLeft={
+                                                <HiTrash size={24} className="text-redWarning" />
+                                            }
+                                        ></MyButton>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
                 <DropDown
                     size="large"
-                    options={members.reduce((acc, member) => {
-                        acc.push(member.MSSV + " - " + member.NAME);
-                        return acc;
-                    }, [])}
+                    options={Object.entries(members).map(([MSSV, NAME]) => MSSV + " - " + NAME)}
                     select={chuNhiem}
                     setSelect={setChuNhiem}
                     fieldName={"Chủ nhiệm đề tài"}
                 ></DropDown>
+                <label htmlFor="NgayBD" className="px-2">
+                    Ngày bắt đầu
+                </label>
+                <Datepicker
+                    placeholder="Chọn ngày"
+                    value={startDate}
+                    id="NgayBD"
+                    language="vi"
+                    onChange={(selectedDate) => {
+                        setStartDate(selectedDate);
+                    }}
+                    className="font-display"
+                ></Datepicker>
+                <label htmlFor="NgayKT" className="px-2">
+                    Ngày kết thúc
+                </label>
+
+                <Datepicker
+                    placeholder="Chọn ngày"
+                    value={endDate}
+                    minDate={startDate}
+                    id="NgayKT"
+                    language="vi"
+                    onChange={(selectedDate) => {
+                        setEndDate(selectedDate);
+                    }}
+                    className="font-display"
+                ></Datepicker>
+                <div className="flex gap-2.5">
+                    <TextWithLabel
+                        id="KINHPHIDUKIEN"
+                        name="KINHPHIDUKIEN"
+                        value={inputs.KINHPHIDUKIEN || ""}
+                        onChange={handleChange}
+                    >
+                        Kinh phí dự kiến
+                    </TextWithLabel>
+                    <TextWithLabel
+                        id="KINHPHITHUCTE"
+                        name="KINHPHITHUCTE"
+                        value={inputs.KINHPHITHUCTE || ""}
+                        onChange={handleChange}
+                    >
+                        Kinh phí thực tế
+                    </TextWithLabel>
+                </div>
                 <label htmlFor="tomtat">Tóm tắt đề tài</label>
                 <textarea
-                    name="tomtat"
-                    id="tomtat"
+                    value={inputs.TOMTAT_NCKH || ""}
+                    name="TOMTAT_NCKH"
+                    id="TOMTAT_NCKH"
                     className="w-full border rounded-md h-100"
+                    onChange={handleChange}
                 ></textarea>
+                <div className="flex w-full gap-2.5 justify-between flex-row-reverse  items-center">
+                    <MyButton
+                        onClick={handleSubmit}
+                        size="large"
+                        className="bg-primaryColor text-white"
+                    >
+                        Tạo
+                    </MyButton>
+                    <MyButton
+                        onClick={() => {
+                            resetInput();
+                        }}
+                        size="large"
+                        variant="underline"
+                        className="text-textColor2 border-textColor3"
+                    >
+                        Huỷ
+                    </MyButton>
+                </div>
             </div>
         </>
     );
@@ -435,21 +541,42 @@ export function DanhSachDeTai() {
                     setSelect={setRowPerPage}
                 ></Pagination>
             </div>
-            <Toast
-                ToastDisplay={ToastDisplay}
-                ToastMessage={ToastMessage}
-                ToastSuccess={ToastSuccess}
-                SetToastDisplay={setToastDisplay}
-            ></Toast>
         </>
     );
 }
 export function DeTai() {
     const [capDeTai, setCapDeTai] = useState();
     const [linhVuc, setLinhVuc] = useState();
+    const {
+        ToastMessage,
+        ToastSuccess,
+        ToastDisplay,
+        setToastDisplay,
+        setToastMessage,
+        setToastSuccess,
+        showToast,
+    } = useContext(GlobalContext);
+    useEffect(() => {
+        setToastDisplay(true);
+        setToastSuccess(true);
+        setToastMessage("Hi");
+    }, []);
     return (
-        <DeTaiContext.Provider value={{ capDeTai, setCapDeTai, linhVuc, setLinhVuc }}>
+        <DeTaiContext.Provider
+            value={{
+                capDeTai,
+                setCapDeTai,
+                linhVuc,
+                setLinhVuc,
+            }}
+        >
             <Outlet />
+            <Toast
+                ToastDisplay={ToastDisplay}
+                ToastMessage={ToastMessage}
+                ToastSuccess={ToastSuccess}
+                SetToastDisplay={setToastDisplay}
+            ></Toast>
         </DeTaiContext.Provider>
     );
 }

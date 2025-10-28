@@ -1,11 +1,13 @@
-import MyButton from "./components/MyButton";
+import MyButton from "../components/MyButton";
 import { HiPlus, HiDownload } from "react-icons/hi";
 import { useEffect, useState } from "react";
-import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
-import { TextWithLabel } from "./components/Form";
-import DropDown from "./components/Dropdown";
+import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal";
+import { TextWithLabel } from "../components/Form";
+import DropDown from "../components/Dropdown";
+import { useContext } from "react";
+import { GlobalContext } from "../context/Context";
 
-import Toast from "./components/Toast";
+import Toast from "../components/Toast";
 
 import {
     Table,
@@ -15,7 +17,8 @@ import {
     TableHead,
     TableBody,
     CheckBox,
-} from "./components/TableOverhaul";
+} from "../components/TableOverhaul";
+import { getUsers } from "../services/Services";
 export default function AdminNguoiDung() {
     //same for components that use modal for crud
     const target = "";
@@ -30,12 +33,21 @@ export default function AdminNguoiDung() {
         HOC_VAN: "",
         ROLE: "",
     };
-    const [ToastMessage, setToastMessage] = useState("");
+    const {
+        ToastMessage,
+        ToastSuccess,
+        ToastDisplay,
+        setToastDisplay,
+        setToastMessage,
+        setToastSuccess,
+        ToastResponse,
+        showToast,
+    } = useContext(GlobalContext);
+
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
     const [editModal, setEditModal] = useState(target); //edit target
-    const [ToastSuccess, setToastSuccess] = useState(true);
-    const [ToastDisplay, setToastDisplay] = useState(false);
+
     const [createModal, setcreateModal] = useState(false);
     const [inputs, setInputs] = useState(initialInput);
     const [selectedRows, setSelectedRows] = useState({});
@@ -44,15 +56,6 @@ export default function AdminNguoiDung() {
     //this component state
     const [role, setRole] = useState("");
     const [educationLevel, setEducationLevel] = useState("");
-    async function response(res) {
-        console.log("responding: ok.");
-        const response = await res.json();
-        console.log(response);
-        setToastMessage(response.message);
-        setToastSuccess(response.success);
-        setcreateModal(false);
-        setToastDisplay(true);
-    }
     function resetInput(initialInput) {
         setInputs(initialInput);
         setRole(initialInput.ROLE);
@@ -86,18 +89,9 @@ export default function AdminNguoiDung() {
     //CRUD
     async function handleGet() {
         try {
-            const res = await fetch("/api/admin/users");
-            const json = await res.json();
-            if (res.ok) {
-                console.log("fetch completed");
-            }
-            setData(json);
-            //init trang thai select, tranh bi loi control uncontroled element
-            const rows = {};
-            json.forEach((row) => {
-                rows[row.USERID] = false;
-            });
-            setSelectedRows(rows);
+            const { usersRes, DSUser } = await getUsers();
+            setData(DSUser);
+            setSelectedRows(Object.fromEntries(DSUser.map((row) => [row.USERID, false])));
         } catch (error) {
             console.log("fetch failed");
         }
@@ -172,7 +166,7 @@ export default function AdminNguoiDung() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(inputs),
             });
-            await response(res); //thong bao cho nguoi dung
+            ToastResponse(res); //thong bao cho nguoi dung
             await handleGet();
         } catch (error) {
             console.log(error.message);
@@ -185,7 +179,7 @@ export default function AdminNguoiDung() {
             const res = await fetch(`/api/admin/users/${target}`, {
                 method: "delete",
             });
-            await response(res); //thong bao cho nguoi dung
+            ToastResponse(res); //thong bao cho nguoi dung
             handleGet();
         } catch (error) {
             console.log(error.message);
@@ -458,10 +452,10 @@ export default function AdminNguoiDung() {
                             {selectedAmount} đã chọn
                         </span>
                         <MyButton
+                            size="medium"
+                            variant="outline"
                             onClick={() => setDisplayConfirmModal(true)}
-                            className={
-                                "border-1 px-2 py-1 text-h6 border-redWarning text-redWarning"
-                            }
+                            className={"px-2 py-1 text-h6 border-redWarning text-redWarning"}
                         >
                             Xoá đã chọn
                         </MyButton>

@@ -1,14 +1,15 @@
-import logo1 from "../pagesAssets/logo1.png";
-import logo2 from "../pagesAssets/logo2.png";
+import logo1 from "../assets/logo1.png";
+import logo2 from "../assets/logo2.png";
 import { useNavigate } from "react-router-dom";
 import MyButton from "./MyButton";
 import { HiUserCircle } from "react-icons/hi";
 import { useContext } from "react";
-import { UserContext } from "../../App";
+import { UserContext } from "../context/Context";
 
 export default function Header({ children }) {
     const navigate = useNavigate();
     const { user, setUser } = useContext(UserContext);
+    console.log(user);
     function handleLogout() {
         localStorage.clear();
         setUser("");

@@ -1,14 +1,14 @@
 import "../App.css";
 import { useEffect, useState, useRef } from "react";
-import InputGiangVien from "./components/InputGiangVien.jsx";
-import Pagination from "./components/pagination.jsx";
-import DropDown from "./components/Dropdown.jsx";
-import Table from "./components/NormalTable.jsx";
-import Search from "./components/Search.jsx";
-import NavigationBar from "./components/removed/NavBar.jsx";
-import MyButton from "./components/MyButton.jsx";
-import Header from "./components/header.jsx";
-import Footer from "./components/Footer.jsx";
+import InputGiangVien from "../components/InputGiangVien.jsx";
+import Pagination from "../components/Pagination.jsx";
+import DropDown from "../components/Dropdown.jsx";
+import Table from "../components/NormalTable.jsx";
+import Search from "../components/Search.jsx";
+import NavigationBar from "../components/removed/NavBar.jsx";
+import MyButton from "../components/MyButton.jsx";
+import Header from "../components/header.jsx";
+import Footer from "../components/Footer.jsx";
 
 //TODO: New normal table componenet
 
@@ -22,11 +22,10 @@ function TableDuAn() {
         {
             maDuAn: "maDuAn01",
             tenDuAn: "Tên dự án 1",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",  
+            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
             capDuAn: "Cấp cơ sở",
             kinhPhi: "1.000.000$",
             thoiGianThucHien: "13/7/2023 - 13/10/2025",
-
         },
         {
             maDuAn: "maDuAn02",
@@ -78,21 +77,28 @@ function TableDuAn() {
     ];
     const fields = ["maDuAn", "tenDuAn", "thanhVien", "kinhPhi", "capDuAn", "thoiGianThucHien"];
     const years = ["2020", "2021", "2022", "2023", "2024", "2025"];
-    const cacCapDuAn = ["Cấp sinh viên", "Cấp cơ sở", "Cấp nghiên cứu sinh", "Cấp địa phương", "Cấp bộ", "Cấp nhà nước"];
+    const cacCapDuAn = [
+        "Cấp sinh viên",
+        "Cấp cơ sở",
+        "Cấp nghiên cứu sinh",
+        "Cấp địa phương",
+        "Cấp bộ",
+        "Cấp nhà nước",
+    ];
     const giangVienKHMT = [
-        {Name: "Mã Trường Thành", MSCB:"002937"},
-        {Name: "Võ Trí Thức", MSCB:"002483"},
-        {Name: "Trần Nguyễn Minh Thư", MSCB:"002635"},
-        {Name: "Trần Việt Châu", MSCB:"002692"},
-        {Name: "Phạm Nguyên Khang", MSCB:"001348"},
-        {Name: "Lê Quyết Thắng", MSCB:"000509"},
-        {Name: "Lưu Tiến Đạo", MSCB:"002805"},
-        {Name: "Phạm Xuân Hiền", MSCB:"001707"},
-        {Name: "Trần Nguyễn Dương Chi", MSCB:"002684"},
-        {Name: "Phan Bích Chung", MSCB:"002265"},
-        {Name: "Nguyễn Bá Diệp", MSCB:"002484"},
-        {Name: "Phạm Nguyên Hoàng", MSCB:"002640"},
-        {Name: "Huỳnh Ngọc Thái Anh", MSCB:"002854"},
+        { Name: "Mã Trường Thành", MSCB: "002937" },
+        { Name: "Võ Trí Thức", MSCB: "002483" },
+        { Name: "Trần Nguyễn Minh Thư", MSCB: "002635" },
+        { Name: "Trần Việt Châu", MSCB: "002692" },
+        { Name: "Phạm Nguyên Khang", MSCB: "001348" },
+        { Name: "Lê Quyết Thắng", MSCB: "000509" },
+        { Name: "Lưu Tiến Đạo", MSCB: "002805" },
+        { Name: "Phạm Xuân Hiền", MSCB: "001707" },
+        { Name: "Trần Nguyễn Dương Chi", MSCB: "002684" },
+        { Name: "Phan Bích Chung", MSCB: "002265" },
+        { Name: "Nguyễn Bá Diệp", MSCB: "002484" },
+        { Name: "Phạm Nguyên Hoàng", MSCB: "002640" },
+        { Name: "Huỳnh Ngọc Thái Anh", MSCB: "002854" },
     ];
     //cac state
 
@@ -116,8 +122,12 @@ function TableDuAn() {
                 (capDuAn === "" || item.capDuAn === capDuAn) &&
                 (giangVien.Name === "" || item.thanhVien.includes(giangVien.Name)) &&
                 (search === "" || item.tenDuAn.toLowerCase().includes(search)) &&
-                (namBD === "" || Number(item.thoiGianThucHien.split("-")[0].split("/")[2].trim()) >= Number(namBD)) &&
-                (namKT === "" || Number(item.thoiGianThucHien.split("-")[1].split("/")[2].trim()) <= Number(namKT))
+                (namBD === "" ||
+                    Number(item.thoiGianThucHien.split("-")[0].split("/")[2].trim()) >=
+                        Number(namBD)) &&
+                (namKT === "" ||
+                    Number(item.thoiGianThucHien.split("-")[1].split("/")[2].trim()) <=
+                        Number(namKT))
         );
         setTableData(data);
     }

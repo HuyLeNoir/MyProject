@@ -1,10 +1,11 @@
-import MyButton from "./components/MyButton";
+import MyButton from "../components/MyButton";
 import { HiPlus, HiDownload } from "react-icons/hi";
-import { useEffect, useState } from "react";
-import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
-import { TextWithLabel } from "./components/Form";
+import { useContext, useEffect, useState } from "react";
+import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal";
+import { TextWithLabel } from "../components/Form";
+import { getCap } from "../services/Services";
 
-import Toast from "./components/Toast";
+import Toast from "../components/Toast";
 import {
     Table,
     TableRow,
@@ -13,30 +14,29 @@ import {
     TableHead,
     TableBody,
     CheckBox,
-} from "./components/TableOverhaul";
+} from "../components/TableOverhaul";
+import { GlobalContext } from "../context/Context";
 function DanhSachCap() {
     const target = "";
+    const {
+        ToastMessage,
+        ToastSuccess,
+        ToastDisplay,
+        setToastDisplay,
+        setToastMessage,
+        setToastSuccess,
+        ToastResponse,
+        showToast,
+    } = useContext(GlobalContext);
     const initialInput = { MA_CAP: "", TEN_CAP: "", MO_TA_CAP: "" };
-    const [ToastMessage, setToastMessage] = useState("");
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
     const [editModal, setEditModal] = useState(target); //edit target
-    const [ToastSuccess, setToastSuccess] = useState(true);
-    const [ToastDisplay, setToastDisplay] = useState(false);
-    const [openModal, setOpenModal] = useState(false);
+    const [createModal, setCreateModal] = useState(false);
     const [inputs, setInputs] = useState(initialInput);
     const [selectedRows, setSelectedRows] = useState({});
     const [selectedAmount, setSelectAmount] = useState(0);
-    async function response(res) {
-        if (res.ok) {
-            console.log("status: ok.");
-            const response = await res.json();
-            setToastMessage(response.message);
-            setToastSuccess(response.success);
-        }
-        setToastDisplay(true);
-        setOpenModal(false);
-    }
+
     function handleSelectAll(e) {
         console.log("select all");
         const isChecked = e.target.checked;
@@ -64,17 +64,9 @@ function DanhSachCap() {
     //CRUD
     async function handleGet() {
         try {
-            const res = await fetch("/api/admin/danhmuc/cap");
-            const json = await res.json();
-            if (res.ok) {
-                console.log("fetch completed");
-            }
-            setData(json);
-            //init trang thai select, tranh bi loi control uncontroled element
-            setSelectedRows({}); //tra ve initial cua selectedRows de tranh sau khi xoa thi cac gia tri (prev) tuc la id cu van con
-            json.map((row) => {
-                setSelectedRows((prev) => ({ ...prev, [row.MA_CAP]: false }));
-            });
+            const { capRes, DSCap } = await getCap();
+            setData(DSCap);
+            setSelectedRows(Object.fromEntries(DSCap.map((row) => [row.MA_CAP, false])));
         } catch (error) {
             console.log("fetch failed");
         }
@@ -87,7 +79,7 @@ function DanhSachCap() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(inputs),
             });
-            await response(res);
+            ToastResponse(res);
             setInputs(initialInput);
             handleGet();
         } catch (error) {
@@ -103,7 +95,7 @@ function DanhSachCap() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ TEN_CAP, MO_TA_CAP }),
             });
-            await response(res); //thong bao cho nguoi dung
+            ToastResponse(res); //thong bao cho nguoi dung
             handleGet();
         } catch (error) {
             console.log(error.message);
@@ -116,7 +108,7 @@ function DanhSachCap() {
             const res = await fetch(`/api/admin/danhmuc/cap/${target}`, {
                 method: "delete",
             });
-            await response(res); //thong bao cho nguoi dung
+            ToastResponse(res); //thong bao cho nguoi dung
             handleGet();
         } catch (error) {
             console.log(error.message);
@@ -124,7 +116,7 @@ function DanhSachCap() {
     }
     return (
         <>
-            <Modal show={openModal}>
+            <Modal show={createModal}>
                 <ModalHeader>Tạo cấp mới</ModalHeader>
                 <ModalBody>
                     <TextWithLabel
@@ -159,7 +151,7 @@ function DanhSachCap() {
                         <button
                             onClick={() => {
                                 setInputs(initialInput);
-                                setOpenModal(false);
+                                setCreateModal(false);
                             }}
                             className="cursor-pointer border-b-2 text-textColor2 border-textColor2 text-h5 overflow-visible px-4 py-1 hover:bg-gray-100 transition-all ease-in-out duration-300"
                         >
@@ -267,10 +259,10 @@ function DanhSachCap() {
                             {selectedAmount} đã chọn
                         </span>
                         <MyButton
+                            size="medium"
+                            variant="outline"
                             onClick={() => setDisplayConfirmModal(true)}
-                            className={
-                                "border-1 px-2 py-1 text-h6 border-redWarning text-redWarning"
-                            }
+                            className={"px-2 py-1 text-h6 border-redWarning text-redWarning"}
                         >
                             Xoá đã chọn
                         </MyButton>
@@ -284,7 +276,7 @@ function DanhSachCap() {
                         Export
                     </MyButton>
                     <MyButton
-                        onClick={() => setOpenModal(true)}
+                        onClick={() => setCreateModal(true)}
                         IconRight={<HiPlus></HiPlus>}
                         size="small"
                         className="bg-successColor justify-center text-textColor1"
@@ -336,7 +328,6 @@ function DanhSachCap() {
                 ToastMessage={ToastMessage}
                 ToastSuccess={ToastSuccess}
                 SetToastDisplay={setToastDisplay}
-                isSuccess={true}
             ></Toast>
         </>
     );

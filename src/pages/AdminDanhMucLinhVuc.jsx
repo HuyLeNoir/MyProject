@@ -1,9 +1,12 @@
-import MyButton from "./components/MyButton";
+import MyButton from "../components/MyButton";
 import { HiPlus, HiDownload } from "react-icons/hi";
 import { useEffect, useState } from "react";
-import { Modal, ModalBody, ModalHeader, ModalFooter } from "./components/Modal";
-import { TextWithLabel } from "./components/Form";
-import Toast from "./components/Toast";
+import { getLinhVuc } from "../services/Services";
+import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal";
+import { TextWithLabel } from "../components/Form";
+import Toast from "../components/Toast";
+import { useContext } from "react";
+import { GlobalContext } from "../context/Context";
 import {
     Table,
     TableRow,
@@ -12,30 +15,31 @@ import {
     TableHead,
     TableBody,
     CheckBox,
-} from "./components/TableOverhaul";
+} from "../components/TableOverhaul";
 function DanhSachCap() {
     const target = "";
     const initialInput = { MA_LINH_VUC: "", TEN_LINH_VUC: "", MO_TA_LINH_VUC: "" };
-    const [ToastMessage, setToastMessage] = useState("");
+
+    const {
+        ToastMessage,
+        ToastSuccess,
+        ToastDisplay,
+        setToastDisplay,
+        setToastMessage,
+        setToastSuccess,
+        showToast,
+        ToastResponse,
+    } = useContext(GlobalContext);
+
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
     const [editModal, setEditModal] = useState(target); //edit target
-    const [ToastSuccess, setToastSuccess] = useState(true);
-    const [ToastDisplay, setToastDisplay] = useState(false);
+
     const [openModal, setOpenModal] = useState(false);
     const [inputs, setInputs] = useState(initialInput);
     const [selectedRows, setSelectedRows] = useState({});
     const [selectedAmount, setSelectAmount] = useState(0);
-    async function response(res) {
-        if (res.ok) {
-            console.log("status: ok.");
-            const response = await res.json();
-            setToastMessage(response.message);
-            setToastSuccess(response.success);
-        }
-        setToastDisplay(true);
-        setOpenModal(false);
-    }
+
     function handleSelectAll(e) {
         console.log("select all");
         const isChecked = e.target.checked;
@@ -63,17 +67,9 @@ function DanhSachCap() {
     //CRUD
     async function handleGet() {
         try {
-            const res = await fetch("/api/admin/danhmuc/linhvuc");
-            const json = await res.json();
-            if (res.ok) {
-                console.log("fetch completed");
-            }
-            setData(json);
-            //init trang thai select, tranh bi loi control uncontroled element
-            setSelectedRows({}); //tra ve initial cua selectedRows de tranh sau khi xoa thi cac gia tri (prev) tuc la id cu van con
-            json.map((row) => {
-                setSelectedRows((prev) => ({ ...prev, [row.MA_LINH_VUC]: false }));
-            });
+            const { linhVucRes, DSLinhVuc } = await getLinhVuc();
+            setData(DSLinhVuc);
+            setSelectedRows(Object.fromEntries(DSLinhVuc.map((row) => [row.MA_LINH_VUC, false])));
         } catch (error) {
             console.log("fetch failed");
         }
@@ -86,7 +82,7 @@ function DanhSachCap() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(inputs),
             });
-            await response(res);
+            ToastResponse(res);
             setInputs(initialInput);
             handleGet();
         } catch (error) {
@@ -102,7 +98,7 @@ function DanhSachCap() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ TEN_LINH_VUC, MO_TA_LINH_VUC }),
             });
-            await response(res); //thong bao cho nguoi dung
+            ToastResponse(res);
             handleGet();
         } catch (error) {
             console.log(error.message);
@@ -115,7 +111,7 @@ function DanhSachCap() {
             const res = await fetch(`/api/admin/danhmuc/linhvuc/${target}`, {
                 method: "delete",
             });
-            await response(res); //thong bao cho nguoi dung
+            ToastResponse(res);
             handleGet();
         } catch (error) {
             console.log(error.message);
@@ -268,10 +264,10 @@ function DanhSachCap() {
                             {selectedAmount} đã chọn
                         </span>
                         <MyButton
+                            size="medium"
+                            variant="outline"
                             onClick={() => setDisplayConfirmModal(true)}
-                            className={
-                                "border-1 px-2 py-1 text-h6 border-redWarning text-redWarning"
-                            }
+                            className={"px-2 py-1 text-h6 border-redWarning text-redWarning"}
                         >
                             Xoá đã chọn
                         </MyButton>

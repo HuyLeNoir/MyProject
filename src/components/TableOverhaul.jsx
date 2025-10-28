@@ -1,7 +1,7 @@
-export function Table({ children, className = "", ...props }) {
+export function Table({ children, className = "w-full", ...props }) {
     return (
         <div className="TableWrapper">
-            <table className={`${className} w-full rounded-lg overflow-hidden`} {...props}>
+            <table className={`${className} rounded-lg overflow-hidden`} {...props}>
                 {children}
             </table>
         </div>

@@ -20,7 +20,7 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien })
         const result = users.filter(
             (user) =>
                 user.Name.toLowerCase().includes(e.target.value.toLowerCase()) ||
-                user.MSCB.includes(e.target.value)
+                user.MACB.includes(e.target.value)
         );
         if (e.target.value == "" || result.length == 0) {
             setOpen(false);
@@ -41,7 +41,7 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien })
                     onChange={handleUserInput}
                     value={giangVien.Name}
                     className="border-1 border-textColor3 rounded-md px-3 py-1"
-                    placeholder="Nhập tên hoặc MSCB"
+                    placeholder="Nhập tên hoặc MACB"
                 />
                 <div
                     ref={resultRef}
@@ -56,10 +56,10 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien })
                             onClick={() => {
                                 onSelectGiangVien(user);
                             }}
-                            key={user.MSCB}
+                            key={user.MACB}
                             className="hover:bg-gray-50 cursor-pointer text-textColor1 text-p p-2 text-left"
                         >
-                            {user.Name} - {user.MSCB}
+                            {user.Name} - {user.MACB}
                         </button>
                     ))}
                 </div>
