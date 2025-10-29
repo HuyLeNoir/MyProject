@@ -1,12 +1,17 @@
 import MyButton from "../components/MyButton.jsx";
 import { Datepicker } from "flowbite-react";
-import { getCap } from "../services/Services.js";
-import { formatDateLocal } from "../util/util.js";
+import { getCap, getLinhVuc, getUsers } from "../services/Services.js";
+import {
+    formatDateLocal,
+    SinhVienFromUsers,
+    GiangVienFromUsers,
+    formatCurrency,
+} from "../util/util.js";
 import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } from "react-icons/hi";
-import { useEffect, useState, createContext, useContext } from "react";
-import { Outlet, useParams, Link } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import { Outlet, useParams, Link, Navigate, useNavigate } from "react-router-dom";
 import { TextWithLabel, OnlyText } from "../components/Form.jsx";
-import { GlobalContext } from "../context/Context.jsx";
+import { AdminContext } from "../context/Context.jsx";
 import Toast from "../components/Toast.jsx";
 import {
     Table,
@@ -29,20 +34,9 @@ export function EditDeTai() {
 }
 export function NewDeTai() {
     //test data
-    const sinhVienFromData = [
-        //fetch
-        { MSSV: "B0000001", NAME: "Nguyễn Văn An" },
-        { MSSV: "B0000002", NAME: "Trần Thị Bình" },
-        { MSSV: "B0000003", NAME: "Lê Quang Dũng" },
-        { MSSV: "B0000004", NAME: "Phạm Thị Hương" },
-        { MSSV: "B0000005", NAME: "Hoàng Văn Khoa" },
-        { MSSV: "B0000006", NAME: "Đỗ Thị Lan" },
-        { MSSV: "B0000007", NAME: "Vũ Minh Tuấn" },
-        { MSSV: "B0000008", NAME: "Ngô Thị Mai" },
-        { MSSV: "B0000009", NAME: "Trịnh Văn Long" },
-        { MSSV: "B0000010", NAME: "Phan Thị Hạnh" },
-    ];
-    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc } = useContext(DeTaiContext);
+    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc, DSCap, DSLinhVuc, DSSinhVien } =
+        useContext(DeTaiContext);
+    const { showToast } = useContext(AdminContext);
     const [giangVien, setGiangVien] = useState({ Name: "", MACB: "" });
     const [chuNhiem, setChuNhiem] = useState("");
     const [startDate, setStartDate] = useState(null);
@@ -52,10 +46,12 @@ export function NewDeTai() {
     const [inputs, setInputs] = useState({});
     useEffect(() => {
         inputs["GVHD"] = giangVien || "";
-        inputs["CHU_NHIEM"] = chuNhiem.split(" - ")[0] || "";
         inputs["MA_CAP"] = capDeTai || "";
         inputs["MA_LINH_VUC"] = linhVuc || "";
         inputs["MEMBERS"] = members || [];
+        if (chuNhiem) {
+            inputs["MEMBERS"][chuNhiem.split(" - ")[0]].CHU_NHIEM = true;
+        }
         inputs["NGAYBD"] = formatDateLocal(startDate);
         inputs["NGAYKT"] = formatDateLocal(endDate);
     }, [chuNhiem, giangVien, capDeTai, linhVuc, members, startDate, endDate]);
@@ -63,19 +59,19 @@ export function NewDeTai() {
         console.log(inputs);
     }
     const giangVienKHMT = [
-        { Name: "Mã Trường Thành", MACB: "002937" },
-        { Name: "Võ Trí Thức", MACB: "002483" },
-        { Name: "Trần Nguyễn Minh Thư", MACB: "002635" },
-        { Name: "Trần Việt Châu", MACB: "002692" },
-        { Name: "Phạm Nguyên Khang", MACB: "001348" },
-        { Name: "Lê Quyết Thắng", MACB: "000509" },
-        { Name: "Lưu Tiến Đạo", MACB: "002805" },
-        { Name: "Phạm Xuân Hiền", MACB: "001707" },
-        { Name: "Trần Nguyễn Dương Chi", MACB: "002684" },
-        { Name: "Phan Bích Chung", MACB: "002265" },
-        { Name: "Nguyễn Bá Diệp", MACB: "002484" },
-        { Name: "Phạm Nguyên Hoàng", MACB: "002640" },
-        { Name: "Huỳnh Ngọc Thái Anh", MACB: "002854" },
+        { HO_TEN_USER: "Mã Trường Thành", MACB: "002937" },
+        { HO_TEN_USER: "Võ Trí Thức", MACB: "002483" },
+        { HO_TEN_USER: "Trần Nguyễn Minh Thư", MACB: "002635" },
+        { HO_TEN_USER: "Trần Việt Châu", MACB: "002692" },
+        { HO_TEN_USER: "Phạm Nguyên Khang", MACB: "001348" },
+        { HO_TEN_USER: "Lê Quyết Thắng", MACB: "000509" },
+        { HO_TEN_USER: "Lưu Tiến Đạo", MACB: "002805" },
+        { HO_TEN_USER: "Phạm Xuân Hiền", MACB: "001707" },
+        { HO_TEN_USER: "Trần Nguyễn Dương Chi", MACB: "002684" },
+        { HO_TEN_USER: "Phan Bích Chung", MACB: "002265" },
+        { HO_TEN_USER: "Nguyễn Bá Diệp", MACB: "002484" },
+        { HO_TEN_USER: "Phạm Nguyên Hoàng", MACB: "002640" },
+        { HO_TEN_USER: "Huỳnh Ngọc Thái Anh", MACB: "002854" },
     ];
     function resetInput() {
         setInputs({});
@@ -98,14 +94,18 @@ export function NewDeTai() {
     }
     useEffect(() => {
         console.log(members);
+        //DEBUG MEMBERS
     }, [members]);
     function handleAddMember() {
-        const sinhvien = sinhVienFromData.find((sinhvien) => sinhvien.MSSV == member);
+        const sinhvien = DSSinhVien.find((sinhvien) => sinhvien.MSSV == member);
         if (!sinhvien) {
-            alert("Khong tim thay sinh vien");
+            showToast(`Không tìm thấy ${member}`, false);
             return;
         }
-        setMembers((prev) => ({ ...prev, [sinhvien.MSSV]: sinhvien.NAME }));
+        setMembers((prev) => ({
+            ...prev,
+            [sinhvien.MSSV]: { HO_TEN_USER: sinhvien.HO_TEN_USER, CHU_NHIEM: false },
+        }));
 
         setMember(""); //reset lai input
     }
@@ -138,27 +138,23 @@ export function NewDeTai() {
                 >
                     Tên đề tài
                 </TextWithLabel>
-                <div className="flex px-2 gap-2.5">
+                <div className="flex z-10 px-2 gap-2.5">
                     <DropDown
-                        size="medium"
+                        size="large"
                         fieldName={"Lĩnh vực"}
-                        options={["Y tế", "Kinh tế", "Văn hoá", "Giáo dục"]}
+                        options={DSLinhVuc}
                         select={linhVuc}
                         setSelect={setLinhVuc}
                     ></DropDown>
                     <DropDown
-                        size="medium"
+                        size="large"
                         fieldName={"Cấp đề tài"}
-                        options={["Cấp sinh viên", "Cấp trường", "Cấp địa phương", "Cấp nhà nước"]}
+                        options={DSCap}
                         select={capDeTai}
                         setSelect={setCapDeTai}
-                    >
-                        <li>Cấp sinh viên</li>
-                        <li>Cấp trường</li>
-                        <li>Cấp địa phương</li>
-                        <li>Cấp nhà nước</li>
-                    </DropDown>
+                    ></DropDown>
                     <TextInput
+                        size="large"
                         giangVien={giangVien}
                         setGiangVien={setGiangVien}
                         users={giangVienKHMT}
@@ -193,20 +189,19 @@ export function NewDeTai() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {Object.entries(members).map(([MSSV, NAME], index) => (
+                        {Object.entries(members).map(([MSSV, USER], index) => (
                             <TableRow key={index}>
                                 <TableCell>{index + 1}</TableCell>
-                                <TableCell>{NAME}</TableCell>
+                                <TableCell>{USER.HO_TEN_USER}</TableCell>
                                 <TableCell>{MSSV}</TableCell>
                                 <TableCell>
                                     <div className="w-full h-full flex items-center justify-center">
                                         <MyButton
-                                            // onClick={() => {
-                                            //     const newMembers = { ...members };
-                                            //     console.log(MSSV);
-                                            //     delete newMembers[MSSV];
-                                            //     setMembers(newMembers);
-                                            // }}
+                                            onClick={() => {
+                                                const newMembers = { ...members };
+                                                delete newMembers[MSSV];
+                                                setMembers(newMembers);
+                                            }}
                                             IconLeft={
                                                 <HiTrash size={24} className="text-redWarning" />
                                             }
@@ -219,7 +214,9 @@ export function NewDeTai() {
                 </Table>
                 <DropDown
                     size="large"
-                    options={Object.entries(members).map(([MSSV, NAME]) => MSSV + " - " + NAME)}
+                    options={Object.entries(members).map(
+                        ([MSSV, { HO_TEN_USER }]) => MSSV + " - " + HO_TEN_USER
+                    )}
                     select={chuNhiem}
                     setSelect={setChuNhiem}
                     fieldName={"Chủ nhiệm đề tài"}
@@ -256,7 +253,7 @@ export function NewDeTai() {
                     <TextWithLabel
                         id="KINHPHIDUKIEN"
                         name="KINHPHIDUKIEN"
-                        value={inputs.KINHPHIDUKIEN || ""}
+                        value={formatCurrency(inputs.KINHPHIDUKIEN) || ""}
                         onChange={handleChange}
                     >
                         Kinh phí dự kiến
@@ -264,7 +261,7 @@ export function NewDeTai() {
                     <TextWithLabel
                         id="KINHPHITHUCTE"
                         name="KINHPHITHUCTE"
-                        value={inputs.KINHPHITHUCTE || ""}
+                        value={formatCurrency(inputs.KINHPHIDUKIEN) || ""}
                         onChange={handleChange}
                     >
                         Kinh phí thực tế
@@ -303,7 +300,8 @@ export function NewDeTai() {
 }
 export function DanhSachDeTai() {
     const [data, setData] = useState([]);
-    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc } = useContext(DeTaiContext);
+    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc, DSCap, DSLinhVuc } =
+        useContext(DeTaiContext);
     const [searchValue, setSearchValue] = useState("");
     const [filterIsOpen, setFilterIsOpen] = useState(false);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
@@ -342,9 +340,6 @@ export function DanhSachDeTai() {
         return Object.values(selectedRows).filter((ID) => ID == true).length;
     }
     let selectedAmount = calcSelecting();
-    useEffect(() => {
-        console.log("testHere");
-    }, [selectedRows]);
 
     return (
         <>
@@ -432,22 +427,19 @@ export function DanhSachDeTai() {
                 <div className={`${filterIsOpen ? "absolute" : "hidden"} mt-2.5 w-full bg-white`}>
                     <div className="p-5 w-full shadow-md flex gap-2.5">
                         <DropDown
+                            size="medium"
                             className="min-w-40"
                             select={capDeTai}
                             setSelect={setCapDeTai}
                             fieldName={"Cấp đề tài"}
-                            options={[
-                                "Cấp sinh viên",
-                                "Cấp trường",
-                                "Cấp địa phương",
-                                "Cấp nhà nước",
-                            ]}
+                            options={DSCap}
                         ></DropDown>
                         <DropDown
+                            size="medium"
                             className="min-w-40"
                             select={linhVuc}
                             setSelect={setLinhVuc}
-                            options={["Y tế", "Kinh tế", "Văn hoá", "Giáo dục"]}
+                            options={DSLinhVuc}
                             fieldName={"Lĩnh vực đề tài"}
                         ></DropDown>
                         <MyButton
@@ -547,6 +539,10 @@ export function DanhSachDeTai() {
 export function DeTai() {
     const [capDeTai, setCapDeTai] = useState();
     const [linhVuc, setLinhVuc] = useState();
+    const [DSSinhVien, setDSSinhVien] = useState([]);
+    const [DSCap, setDSCap] = useState([]);
+    const [DSGiangViem, setDSGiangVien] = useState([]);
+    const [DSLinhVuc, setDSLinhVuc] = useState([]);
     const {
         ToastMessage,
         ToastSuccess,
@@ -555,12 +551,30 @@ export function DeTai() {
         setToastMessage,
         setToastSuccess,
         showToast,
-    } = useContext(GlobalContext);
+    } = useContext(AdminContext);
+
+    useEffect(() => {
+        async function getData() {
+            const { cap, DSCap } = await getCap();
+            const { linhvucRes, DSLinhVuc } = await getLinhVuc();
+            const { usersRes, DSUser } = await getUsers();
+            setDSCap(DSCap.map((row) => row.TEN_CAP));
+            setDSLinhVuc(DSLinhVuc.map((row) => row.TEN_LINH_VUC));
+            const sv = SinhVienFromUsers(DSUser);
+            setDSSinhVien(sv);
+            const gv = GiangVienFromUsers(DSUser);
+            setDSGiangVien(gv);
+        }
+        getData();
+    }, []);
     useEffect(() => {
         setToastDisplay(true);
         setToastSuccess(true);
         setToastMessage("Hi");
     }, []);
+    useEffect(() => {
+        console.log(DSCap);
+    }, [DSCap]);
     return (
         <DeTaiContext.Provider
             value={{
@@ -568,6 +582,9 @@ export function DeTai() {
                 setCapDeTai,
                 linhVuc,
                 setLinhVuc,
+                DSCap,
+                DSLinhVuc,
+                DSSinhVien,
             }}
         >
             <Outlet />

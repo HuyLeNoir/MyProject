@@ -6,7 +6,7 @@ import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal"
 import { TextWithLabel } from "../components/Form";
 import Toast from "../components/Toast";
 import { useContext } from "react";
-import { GlobalContext } from "../context/Context";
+import { AdminContext } from "../context/Context";
 import {
     Table,
     TableRow,
@@ -18,8 +18,6 @@ import {
 } from "../components/TableOverhaul";
 function DanhSachCap() {
     const target = "";
-    const initialInput = { MA_LINH_VUC: "", TEN_LINH_VUC: "", MO_TA_LINH_VUC: "" };
-
     const {
         ToastMessage,
         ToastSuccess,
@@ -29,16 +27,17 @@ function DanhSachCap() {
         setToastSuccess,
         showToast,
         ToastResponse,
-    } = useContext(GlobalContext);
+    } = useContext(AdminContext);
 
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
     const [editModal, setEditModal] = useState(target); //edit target
 
-    const [openModal, setOpenModal] = useState(false);
-    const [inputs, setInputs] = useState(initialInput);
+    const [inputs, setInputs] = useState({ MA_LINH_VUC: "", TEN_LINH_VUC: "", MO_TA_LINH_VUC: "" });
     const [selectedRows, setSelectedRows] = useState({});
     const [selectedAmount, setSelectAmount] = useState(0);
+
+    const [openModal, setOpenModal] = useState(false);
 
     function handleSelectAll(e) {
         console.log("select all");
@@ -83,7 +82,7 @@ function DanhSachCap() {
                 body: JSON.stringify(inputs),
             });
             ToastResponse(res);
-            setInputs(initialInput);
+            setInputs({});
             handleGet();
         } catch (error) {
             console.log(error.message);
@@ -103,7 +102,7 @@ function DanhSachCap() {
         } catch (error) {
             console.log(error.message);
         }
-        setInputs(initialInput);
+        setInputs({});
         setEditModal(false);
     }
     async function handleDelete(target) {
@@ -124,7 +123,7 @@ function DanhSachCap() {
                 <ModalBody>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.MA_LINH_VUC}
+                        value={inputs.MA_LINH_VUC || ""}
                         name="MA_LINH_VUC"
                         id="MA_LINH_VUC"
                     >
@@ -132,7 +131,7 @@ function DanhSachCap() {
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.TEN_LINH_VUC}
+                        value={inputs.TEN_LINH_VUC || ""}
                         name="TEN_LINH_VUC"
                         id="TEN_LINH_VUC"
                     >
@@ -143,7 +142,7 @@ function DanhSachCap() {
                     </label>
                     <textarea
                         onChange={handleChange}
-                        value={inputs.MO_TA_LINH_VUC}
+                        value={inputs.MO_TA_LINH_VUC || ""}
                         name="MO_TA_LINH_VUC"
                         id="MO_TA_LINH_VUC"
                         className="p-2 w-[100%] h-20 border-secondaryColor border-2 transition-all ease-in-out duration-300 focus:border-primaryColor outline-0"
@@ -153,7 +152,7 @@ function DanhSachCap() {
                     <div className="flex justify-end gap-2.5 w-full">
                         <button
                             onClick={() => {
-                                setInputs(initialInput);
+                                setInputs({});
                                 setOpenModal(false);
                             }}
                             className="cursor-pointer border-b-2 text-textColor2 border-textColor2 text-h5 overflow-visible px-4 py-1 hover:bg-gray-100 transition-all ease-in-out duration-300"
@@ -176,7 +175,7 @@ function DanhSachCap() {
                     <TextWithLabel
                         disabled={true}
                         onChange={handleChange}
-                        value={inputs.MA_LINH_VUC}
+                        value={inputs.MA_LINH_VUC || ""}
                         name="MA_LINH_VUC"
                         id="MA_LINH_VUC"
                     >
@@ -184,7 +183,7 @@ function DanhSachCap() {
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.TEN_LINH_VUC}
+                        value={inputs.TEN_LINH_VUC || ""}
                         name="TEN_LINH_VUC"
                         id="TEN_LINH_VUC"
                     >
@@ -195,7 +194,7 @@ function DanhSachCap() {
                     </label>
                     <textarea
                         onChange={handleChange}
-                        value={inputs.MO_TA_LINH_VUC}
+                        value={inputs.MO_TA_LINH_VUC || ""}
                         name="MO_TA_LINH_VUC"
                         id="MO_TA_LINH_VUC"
                         className="p-2 w-[100%] h-20 border-secondaryColor border-2 transition-all ease-in-out duration-300 focus:border-primaryColor outline-0"
@@ -205,7 +204,7 @@ function DanhSachCap() {
                     <div className="flex justify-end gap-2.5 w-full">
                         <button
                             onClick={() => {
-                                setInputs(initialInput);
+                                setInputs({});
                                 setEditModal(false);
                             }}
                             className="cursor-pointer border-b-2 text-textColor2 border-textColor2 text-h5 overflow-visible px-4 py-1 hover:bg-gray-100 transition-all ease-in-out duration-300"

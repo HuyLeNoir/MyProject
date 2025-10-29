@@ -15,19 +15,11 @@ import {
     TableBody,
     CheckBox,
 } from "../components/TableOverhaul";
-import { GlobalContext } from "../context/Context";
+import { AdminContext } from "../context/Context";
 function DanhSachCap() {
     const target = "";
-    const {
-        ToastMessage,
-        ToastSuccess,
-        ToastDisplay,
-        setToastDisplay,
-        setToastMessage,
-        setToastSuccess,
-        ToastResponse,
-        showToast,
-    } = useContext(GlobalContext);
+    const { ToastMessage, ToastSuccess, ToastDisplay, setToastDisplay, ToastResponse } =
+        useContext(AdminContext);
     const initialInput = { MA_CAP: "", TEN_CAP: "", MO_TA_CAP: "" };
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
@@ -38,7 +30,6 @@ function DanhSachCap() {
     const [selectedAmount, setSelectAmount] = useState(0);
 
     function handleSelectAll(e) {
-        console.log("select all");
         const isChecked = e.target.checked;
         const updatedRow = Object.keys(selectedRows).reduce((acc, key) => {
             acc[key] = isChecked;
@@ -72,7 +63,6 @@ function DanhSachCap() {
         }
     }
     async function handleCreate() {
-        console.log(inputs);
         try {
             const res = await fetch("/api/admin/danhmuc/cap/", {
                 method: "post",

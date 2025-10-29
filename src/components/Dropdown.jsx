@@ -5,13 +5,12 @@ export default function DropDown({
     className = "",
     defaultValue,
     fieldName,
-    options,
+    options = [],
     select,
     setSelect,
     size = "auto",
 }) {
     const [open, setOpen] = useState(false);
-    // const [select, setselect] = useState("");
     const sizes = {
         small: "min-w-30",
         medium: "min-w-40",

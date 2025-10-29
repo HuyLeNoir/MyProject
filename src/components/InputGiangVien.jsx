@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-export default function TextInput({ fieldName, users, giangVien, setGiangVien }) {
+export default function TextInput({ fieldName, users, giangVien, setGiangVien, size = "auto" }) {
+    const sizes = {
+        small: "min-w-30",
+        medium: "min-w-40",
+        large: "min-w-60",
+        auto: " ",
+    };
     const [searchResults, setSearchResults] = useState([]);
     const [open, setOpen] = useState(false);
     const resultRef = useRef();
@@ -15,11 +21,10 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien })
     }, []);
     function handleUserInput(e) {
         setOpen(true);
-        setGiangVien((prev) => ({ ...prev, Name: e.target.value }));
-        console.log(e.target.value); //test
+        setGiangVien((prev) => ({ ...prev, HO_TEN_USER: e.target.value }));
         const result = users.filter(
             (user) =>
-                user.Name.toLowerCase().includes(e.target.value.toLowerCase()) ||
+                user.HO_TEN_USER.toLowerCase().includes(e.target.value.toLowerCase()) ||
                 user.MACB.includes(e.target.value)
         );
         if (e.target.value == "" || result.length == 0) {
@@ -35,12 +40,12 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien })
     return (
         <div className="flex gap-2.5 justify-center items-center">
             <p>{fieldName}</p>
-            <div className="relative">
+            <div className={`relative ${sizes[size]}`}>
                 <input
                     type="text"
                     onChange={handleUserInput}
-                    value={giangVien.Name}
-                    className="border-1 border-textColor3 rounded-md px-3 py-1"
+                    value={giangVien.HO_TEN_USER + " - " + giangVien.MACB}
+                    className="border-1 border-textColor3 w-full rounded-md px-3 py-1"
                     placeholder="Nhập tên hoặc MACB"
                 />
                 <div
@@ -59,7 +64,7 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien })
                             key={user.MACB}
                             className="hover:bg-gray-50 cursor-pointer text-textColor1 text-p p-2 text-left"
                         >
-                            {user.Name} - {user.MACB}
+                            {user.HO_TEN_USER} - {user.MACB}
                         </button>
                     ))}
                 </div>

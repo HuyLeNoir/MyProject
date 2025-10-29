@@ -5,7 +5,7 @@ import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal"
 import { TextWithLabel } from "../components/Form";
 import DropDown from "../components/Dropdown";
 import { useContext } from "react";
-import { GlobalContext } from "../context/Context";
+import { AdminContext, GlobalContext } from "../context/Context";
 
 import Toast from "../components/Toast";
 
@@ -42,27 +42,21 @@ export default function AdminNguoiDung() {
         setToastSuccess,
         ToastResponse,
         showToast,
-    } = useContext(GlobalContext);
+    } = useContext(AdminContext);
 
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
     const [editModal, setEditModal] = useState(target); //edit target
 
     const [createModal, setcreateModal] = useState(false);
-    const [inputs, setInputs] = useState(initialInput);
-    const [selectedRows, setSelectedRows] = useState({});
-    const [selectedAmount, setSelectAmount] = useState(0);
 
     //this component state
     const [role, setRole] = useState("");
     const [educationLevel, setEducationLevel] = useState("");
-    function resetInput(initialInput) {
-        setInputs(initialInput);
-        setRole(initialInput.ROLE);
-        setEducationLevel(initialInput.HOC_VAN);
-    }
+    const [inputs, setInputs] = useState({});
+    const [selectedRows, setSelectedRows] = useState({});
+    const [selectedAmount, setSelectAmount] = useState(0);
     function handleSelectAll(e) {
-        console.log("select all");
         const isChecked = e.target.checked;
         const updatedRow = Object.keys(selectedRows).reduce((acc, key) => {
             acc[key] = isChecked;
@@ -79,9 +73,16 @@ export default function AdminNguoiDung() {
         console.log("changing state of ", ID);
         setSelectedRows((prev) => ({ ...prev, [ID]: !prev[ID] }));
     }
+
+    function resetInput(initialInput) {
+        setInputs(initialInput);
+        setRole(initialInput.ROLE);
+        setEducationLevel(initialInput.HOC_VAN);
+    }
     useEffect(() => {
         //load du lieu ngay khi mount
         handleGet();
+        setInputs({});
     }, []);
     useEffect(() => {
         setSelectAmount(Object.values(selectedRows).filter((ID) => ID == true).length);
@@ -192,7 +193,7 @@ export default function AdminNguoiDung() {
                 <ModalBody>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.USERID}
+                        value={inputs.USERID || ""}
                         name="USERID"
                         id="USERID"
                     >
@@ -201,7 +202,7 @@ export default function AdminNguoiDung() {
                     <TextWithLabel
                         type="password"
                         onChange={handleChange}
-                        value={inputs.PASSWORD}
+                        value={inputs.PASSWORD || ""}
                         name="PASSWORD"
                         id="PASSWORD"
                     >
@@ -209,18 +210,23 @@ export default function AdminNguoiDung() {
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.HO_TEN_USER}
+                        value={inputs.HO_TEN_USER || ""}
                         name="HO_TEN_USER"
                         id="HO_TEN_USER"
                     >
                         Họ tên người dùng
                     </TextWithLabel>
-                    <TextWithLabel onChange={handleChange} value={inputs.SDT} name="SDT" id="SDT">
+                    <TextWithLabel
+                        onChange={handleChange}
+                        value={inputs.SDT || ""}
+                        name="SDT"
+                        id="SDT"
+                    >
                         Số điện thoại
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.EMAIL}
+                        value={inputs.EMAIL || ""}
                         name="EMAIL"
                         id="EMAIL"
                     >
@@ -257,7 +263,7 @@ export default function AdminNguoiDung() {
                             <div className="SinhVien">
                                 <TextWithLabel
                                     onChange={handleChange}
-                                    value={inputs.MSSV}
+                                    value={inputs.MSSV || ""}
                                     name="MSSV"
                                     id="MSSV"
                                 >
@@ -268,7 +274,7 @@ export default function AdminNguoiDung() {
                             <div className="GiangVien">
                                 <TextWithLabel
                                     onChange={handleChange}
-                                    value={inputs.MACB}
+                                    value={inputs.MACB || ""}
                                     name="MACB"
                                     id="MACB"
                                 >
@@ -303,7 +309,7 @@ export default function AdminNguoiDung() {
                     <TextWithLabel
                         disabled={true}
                         onChange={handleChange}
-                        value={inputs.USERID}
+                        value={inputs.USERID || ""}
                         name="USERID"
                         id="USERID"
                     >
@@ -312,7 +318,7 @@ export default function AdminNguoiDung() {
                     <TextWithLabel
                         type="password"
                         onChange={handleChange}
-                        value={inputs.PASSWORD}
+                        value={inputs.PASSWORD || ""}
                         name="PASSWORD"
                         id="PASSWORD"
                     >
@@ -320,7 +326,7 @@ export default function AdminNguoiDung() {
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.HO_TEN_USER}
+                        value={inputs.HO_TEN_USER || ""}
                         name="HO_TEN_USER"
                         id="HO_TEN_USER"
                     >
@@ -331,7 +337,7 @@ export default function AdminNguoiDung() {
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.EMAIL}
+                        value={inputs.EMAIL || ""}
                         name="EMAIL"
                         id="EMAIL"
                     >
@@ -368,7 +374,7 @@ export default function AdminNguoiDung() {
                             <div className="SinhVien">
                                 <TextWithLabel
                                     onChange={handleChange}
-                                    value={inputs.MSSV}
+                                    value={inputs.MSSV || ""}
                                     name="MSSV"
                                     id="MSSV"
                                 >
@@ -379,7 +385,7 @@ export default function AdminNguoiDung() {
                             <div className="GiangVien">
                                 <TextWithLabel
                                     onChange={handleChange}
-                                    value={inputs.MACB}
+                                    value={inputs.MACB || ""}
                                     name="MACB"
                                     id="MACB"
                                 >

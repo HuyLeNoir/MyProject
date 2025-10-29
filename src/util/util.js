@@ -3,7 +3,14 @@ export function formatDateLocal(date) {
     const pad = (n) => String(n).padStart(2, "0");
     return [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join("-");
 }
-
+export function formatCurrency(value) {
+    if (!value) {
+        return;
+    }
+    //value -> number
+    const temp = Number(value.replace(/\./g, ""));
+    return temp.toLocaleString("vi-VN");
+}
 export function getCurrentUser() {
     try {
         const userData = JSON.parse(localStorage.getItem("user")).userData;
@@ -25,4 +32,22 @@ export async function apiResponse(res) {
         return { success: false, message: "Request error" };
     }
     return await res.json();
+}
+export function SinhVienFromUsers(dbResult) {
+    return dbResult
+        .filter((row) => row.ROLE === "SinhVien")
+        .map((row) => ({
+            USERID: row.USERID,
+            HO_TEN_USER: row.HO_TEN_USER,
+            MSSV: row.MSSV,
+        }));
+}
+export function GiangVienFromUsers(dbResult) {
+    return dbResult
+        .filter((row) => row.ROLE === "GiangVien")
+        .map((row) => ({
+            USERID: row.USERID,
+            HO_TEN_USER: row.HO_TEN_USER,
+            MACB: row.MACB,
+        }));
 }
