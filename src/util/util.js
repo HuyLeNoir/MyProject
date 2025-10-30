@@ -3,6 +3,12 @@ export function formatDateLocal(date) {
     const pad = (n) => String(n).padStart(2, "0");
     return [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join("-");
 }
+export function currencyStringToNunber(str) {
+    if (!str) {
+        return;
+    }
+    return Number(str.replace(/\./g, ""));
+}
 export function formatCurrency(value) {
     if (!value) {
         return;

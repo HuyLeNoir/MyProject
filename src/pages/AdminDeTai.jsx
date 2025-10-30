@@ -6,9 +6,10 @@ import {
     SinhVienFromUsers,
     GiangVienFromUsers,
     formatCurrency,
+    currencyStringToNunber,
 } from "../util/util.js";
 import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } from "react-icons/hi";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import { Outlet, useParams, Link, Navigate, useNavigate } from "react-router-dom";
 import { TextWithLabel, OnlyText } from "../components/Form.jsx";
 import { AdminContext } from "../context/Context.jsx";
@@ -33,70 +34,119 @@ export function EditDeTai() {
     return <div></div>;
 }
 export function NewDeTai() {
+    console.log("new detai rerender");
     //test data
-    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc, DSCap, DSLinhVuc, DSSinhVien } =
-        useContext(DeTaiContext);
+    const {
+        capDeTai,
+        setCapDeTai,
+        linhVuc,
+        setLinhVuc,
+        DSCap,
+        DSLinhVuc,
+        DSSinhVien,
+        DSGiangVien,
+    } = useContext(DeTaiContext);
+    const { ToastResponse } = useContext(AdminContext);
     const { showToast } = useContext(AdminContext);
-    const [giangVien, setGiangVien] = useState({ Name: "", MACB: "" });
+    const [giangVien, setGiangVien] = useState("");
     const [chuNhiem, setChuNhiem] = useState("");
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [member, setMember] = useState("");
     const [members, setMembers] = useState({});
     const [inputs, setInputs] = useState({});
-    useEffect(() => {
-        inputs["GVHD"] = giangVien || "";
-        inputs["MA_CAP"] = capDeTai || "";
-        inputs["MA_LINH_VUC"] = linhVuc || "";
-        inputs["MEMBERS"] = members || [];
-        if (chuNhiem) {
-            inputs["MEMBERS"][chuNhiem.split(" - ")[0]].CHU_NHIEM = true;
-        }
-        inputs["NGAYBD"] = formatDateLocal(startDate);
-        inputs["NGAYKT"] = formatDateLocal(endDate);
-    }, [chuNhiem, giangVien, capDeTai, linhVuc, members, startDate, endDate]);
-    function handleSubmit() {
-        console.log(inputs);
+    function handleGet() {
+        console.log("fetching detais");
     }
-    const giangVienKHMT = [
-        { HO_TEN_USER: "Mã Trường Thành", MACB: "002937" },
-        { HO_TEN_USER: "Võ Trí Thức", MACB: "002483" },
-        { HO_TEN_USER: "Trần Nguyễn Minh Thư", MACB: "002635" },
-        { HO_TEN_USER: "Trần Việt Châu", MACB: "002692" },
-        { HO_TEN_USER: "Phạm Nguyên Khang", MACB: "001348" },
-        { HO_TEN_USER: "Lê Quyết Thắng", MACB: "000509" },
-        { HO_TEN_USER: "Lưu Tiến Đạo", MACB: "002805" },
-        { HO_TEN_USER: "Phạm Xuân Hiền", MACB: "001707" },
-        { HO_TEN_USER: "Trần Nguyễn Dương Chi", MACB: "002684" },
-        { HO_TEN_USER: "Phan Bích Chung", MACB: "002265" },
-        { HO_TEN_USER: "Nguyễn Bá Diệp", MACB: "002484" },
-        { HO_TEN_USER: "Phạm Nguyên Hoàng", MACB: "002640" },
-        { HO_TEN_USER: "Huỳnh Ngọc Thái Anh", MACB: "002854" },
-    ];
+    async function handleSubmit() {
+        const submitInput = { ...inputs };
+
+        let membersArray = Object.entries(members).map(([MSSV, USER]) => {
+            const isChuNhiem = chuNhiem ? chuNhiem.split(" - ")[0] === MSSV : false;
+            return {
+                MSSV: MSSV,
+                HO_TEN_USER: USER.HO_TEN_USER,
+                CHU_NHIEM: isChuNhiem,
+            };
+        });
+        submitInput["GVHD"] = giangVien;
+        submitInput["TEN_CAP"] = capDeTai;
+        submitInput["TEN_LINH_VUC"] = linhVuc;
+        submitInput["MEMBERS"] = membersArray;
+        submitInput["NGAYBD"] = formatDateLocal(startDate);
+        submitInput["NGAYKT"] = formatDateLocal(endDate);
+        submitInput["KINHPHIDUKIEN"] = currencyStringToNunber(submitInput["KINHPHIDUKIEN"]);
+        submitInput["KINHPHITHUCTE"] = currencyStringToNunber(submitInput["KINHPHITHUCTE"]);
+
+        const REQUIRED_FIELDS = [
+            "ID_DETAI",
+            "TEN_DETAI",
+            "GVHD",
+            "KINHPHIDUKIEN",
+            "KINHPHITHUCTE",
+            "TEN_CAP",
+            "TEN_LINH_VUC",
+            "NGAYBD",
+            "NGAYKT",
+            "TOMTAT_NCKH",
+        ];
+
+        // Tìm các trường bị thiếu
+        const missingField = REQUIRED_FIELDS.find((field) => {
+            // Kiểm tra xem giá trị có trống rỗng, null, hoặc undefined không
+            const value = submitInput[field];
+            return !value || (typeof value === "string" && value.trim() === "");
+        });
+
+        // Kiểm tra trường hợp MEMBERS (phải có ít nhất 1 người)
+        if (!submitInput["MEMBERS"] || submitInput["MEMBERS"].length === 0) {
+            showToast("Vui lòng thêm ít nhất 1 thành viên.", false);
+            return;
+        }
+
+        // Nếu tìm thấy trường bị thiếu, dừng lại và hiển thị lỗi
+        if (missingField) {
+            showToast(`Trường "${missingField}" là bắt buộc!`, false);
+            return;
+        }
+        try {
+            console.log(submitInput);
+            const res = await fetch("/api/admin/detais/", {
+                method: "post",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(submitInput),
+            });
+            ToastResponse(res);
+            handleGet();
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+    const giangVienKHMT = DSGiangVien;
     function resetInput() {
         setInputs({});
         setLinhVuc("");
         setCapDeTai("");
-        setGiangVien({ Name: "", MACB: "" });
+        setGiangVien("");
         setMember("");
         setMembers({});
         setChuNhiem("");
         setStartDate(null);
         setEndDate(null);
     }
-    function handleChange(e) {
-        const name = e.target.name;
-        const value = e.target.value;
-        setInputs((prev) => ({ ...prev, [name]: value }));
-    }
+    const handleChange = useCallback(
+        (e) => {
+            const name = e.target.name;
+            const value = e.target.value;
+            setInputs((prev) => ({ ...prev, [name]: value }));
+        },
+        [setInputs]
+    );
     function handleMemberChange(e) {
         setMember(e.target.value);
     }
-    useEffect(() => {
-        console.log(members);
-        //DEBUG MEMBERS
-    }, [members]);
-    function handleAddMember() {
+
+    const handleAddMember = useCallback(() => {
         const sinhvien = DSSinhVien.find((sinhvien) => sinhvien.MSSV == member);
         if (!sinhvien) {
             showToast(`Không tìm thấy ${member}`, false);
@@ -108,7 +158,7 @@ export function NewDeTai() {
         }));
 
         setMember(""); //reset lai input
-    }
+    }, [member, DSSinhVien, showToast, setMembers, setMember]);
     return (
         <>
             <div className="flex gap-2.5 justify-left items-center">
@@ -213,6 +263,7 @@ export function NewDeTai() {
                     </TableBody>
                 </Table>
                 <DropDown
+                    className="z-9"
                     size="large"
                     options={Object.entries(members).map(
                         ([MSSV, { HO_TEN_USER }]) => MSSV + " - " + HO_TEN_USER
@@ -261,7 +312,7 @@ export function NewDeTai() {
                     <TextWithLabel
                         id="KINHPHITHUCTE"
                         name="KINHPHITHUCTE"
-                        value={formatCurrency(inputs.KINHPHIDUKIEN) || ""}
+                        value={formatCurrency(inputs.KINHPHITHUCTE) || ""}
                         onChange={handleChange}
                     >
                         Kinh phí thực tế
@@ -541,7 +592,7 @@ export function DeTai() {
     const [linhVuc, setLinhVuc] = useState();
     const [DSSinhVien, setDSSinhVien] = useState([]);
     const [DSCap, setDSCap] = useState([]);
-    const [DSGiangViem, setDSGiangVien] = useState([]);
+    const [DSGiangVien, setDSGiangVien] = useState([]);
     const [DSLinhVuc, setDSLinhVuc] = useState([]);
     const {
         ToastMessage,
@@ -555,6 +606,7 @@ export function DeTai() {
 
     useEffect(() => {
         async function getData() {
+            console.log("getData was called?");
             const { cap, DSCap } = await getCap();
             const { linhvucRes, DSLinhVuc } = await getLinhVuc();
             const { usersRes, DSUser } = await getUsers();
@@ -585,6 +637,7 @@ export function DeTai() {
                 DSCap,
                 DSLinhVuc,
                 DSSinhVien,
+                DSGiangVien,
             }}
         >
             <Outlet />

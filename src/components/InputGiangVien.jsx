@@ -21,7 +21,7 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
     }, []);
     function handleUserInput(e) {
         setOpen(true);
-        setGiangVien((prev) => ({ ...prev, HO_TEN_USER: e.target.value }));
+        setGiangVien({ input: e.target.value });
         const result = users.filter(
             (user) =>
                 user.HO_TEN_USER.toLowerCase().includes(e.target.value.toLowerCase()) ||
@@ -35,7 +35,11 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
     function onSelectGiangVien(user) {
         setOpen(false);
         console.log("selected ", user);
-        setGiangVien(user);
+        setGiangVien({
+            input: user.MACB + " - " + user.HO_TEN_USER,
+            HO_TEN_USER: user.HO_TEN_USER,
+            MACB: user.MACB,
+        });
     }
     return (
         <div className="flex gap-2.5 justify-center items-center">
@@ -44,7 +48,7 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
                 <input
                     type="text"
                     onChange={handleUserInput}
-                    value={giangVien.HO_TEN_USER + " - " + giangVien.MACB}
+                    value={giangVien.input || ""}
                     className="border-1 border-textColor3 w-full rounded-md px-3 py-1"
                     placeholder="Nhập tên hoặc MACB"
                 />
@@ -64,7 +68,7 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
                             key={user.MACB}
                             className="hover:bg-gray-50 cursor-pointer text-textColor1 text-p p-2 text-left"
                         >
-                            {user.HO_TEN_USER} - {user.MACB}
+                            {user.MACB} - {user.HO_TEN_USER}
                         </button>
                     ))}
                 </div>

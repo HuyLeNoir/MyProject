@@ -1,7 +1,7 @@
 import Header from "../components/header.jsx";
 import { Outlet, Link } from "react-router-dom";
 import { HiChevronDown } from "react-icons/hi";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AdminContext } from "../context/Context.jsx";
 
 // Simple local TextInput for admin page (avoids importing from Login)
@@ -68,16 +68,25 @@ function AdminContent() {
      * @param {string} message Thông báo muốn hiển thị
      * @param {boolean} success Trạng thái thành công hay thất bại
      */
-    function showToast(message, success) {
-        setToastMessage(message);
-        setToastSuccess(success);
-        setToastDisplay(true);
-    }
-    async function ToastResponse(res) {
-        const response = await res.json();
-        showToast(response.message, response.success);
-    }
+    const showToast = useCallback(
+        (message, success) => {
+            setToastMessage(message);
+            setToastSuccess(success);
+            setToastDisplay(true);
+        },
+        [setToastMessage, setToastSuccess, setToastDisplay]
+    );
+    // Dependencies: Bao gồm tất cả các hàm setter được sử dụng bên trong.
 
+    // ✨ Tối ưu hóa ToastResponse ✨
+    const ToastResponse = useCallback(
+        async (res) => {
+            const response = await res.json();
+            // showToast cũng là một dependency vì nó được gọi bên trong hàm này
+            showToast(response.message, response.success);
+        },
+        [showToast]
+    );
     return (
         <div className="col-span-8 main">
             <AdminContext.Provider

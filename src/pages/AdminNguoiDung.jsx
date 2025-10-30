@@ -19,9 +19,10 @@ import {
     CheckBox,
 } from "../components/TableOverhaul";
 import { getUsers } from "../services/Services";
+import { useNavigate } from "react-router-dom";
 export default function AdminNguoiDung() {
+    const navigate = useNavigate();
     //same for components that use modal for crud
-    const target = "";
     const initialInput = {
         USERID: "",
         HO_TEN_USER: "",
@@ -46,7 +47,7 @@ export default function AdminNguoiDung() {
 
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
-    const [editModal, setEditModal] = useState(target); //edit target
+    const [editModal, setEditModal] = useState(""); //edit target
 
     const [createModal, setcreateModal] = useState(false);
 
@@ -91,10 +92,15 @@ export default function AdminNguoiDung() {
     async function handleGet() {
         try {
             const { usersRes, DSUser } = await getUsers();
-            setData(DSUser);
-            setSelectedRows(Object.fromEntries(DSUser.map((row) => [row.USERID, false])));
+            if (usersRes.ok) {
+                setData(DSUser);
+                setSelectedRows(Object.fromEntries(DSUser.map((row) => [row.USERID, false])));
+            }
         } catch (error) {
-            console.log("fetch failed");
+            console.log(error.message);
+            if (error.message.includes("403")) {
+                navigate("/login");
+            }
         }
     }
     function checkInput(inputs) {
@@ -106,7 +112,7 @@ export default function AdminNguoiDung() {
         const ROLE_reg = /^SinhVien|GiangVien|Admin$/i;
         const hoc_van_reg = /^Sinh viên|Nghiên cứu sinh|Thạc sĩ|tiến sĩ|PGS.TS|GS.TS|$/;
 
-        const { EMAIL, SDT, MSSV, MACB } = inputs;
+        const { EMAIL, SDT, MSSV, MACB, ROLE } = inputs;
         let errMessage = "err";
         const succMessage = "Kiểm tra inputs thành công";
         const response = { isSuccess: true, message: "" };
@@ -124,8 +130,10 @@ export default function AdminNguoiDung() {
             isSuccess = false;
             errMessage = "Vui lòng kiểm tra lại địa chỉ email";
         } else if (!MSSV ? !MACB_reg.test(MACB) : !MSSV_reg.test(MSSV) && isSuccess) {
-            isSuccess = false;
-            errMessage = "Vui lòng kiểm tra lại mã số sinh viên";
+            if (ROLE !== "Admin") {
+                isSuccess = false;
+                errMessage = "Vui lòng kiểm tra lại mã số sinh viên hoặc mã cán bộ";
+            }
         }
         response["isSuccess"] = isSuccess;
         response["message"] = !isSuccess ? errMessage : succMessage;
@@ -135,7 +143,6 @@ export default function AdminNguoiDung() {
         inputs["HOC_VAN"] = educationLevel;
         inputs["ROLE"] = role;
         const { isSuccess, message } = checkInput(inputs);
-        console.log(isSuccess, message);
         if (!isSuccess) {
             //kiem tra input
             setToastDisplay(true);
@@ -149,7 +156,7 @@ export default function AdminNguoiDung() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(inputs),
                 });
-                await response(res);
+                ToastResponse(res);
                 resetInput(initialInput);
                 await handleGet();
             } catch (error) {

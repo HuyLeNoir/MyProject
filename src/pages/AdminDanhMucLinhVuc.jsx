@@ -16,7 +16,9 @@ import {
     TableBody,
     CheckBox,
 } from "../components/TableOverhaul";
+import { useNavigate } from "react-router-dom";
 function DanhSachCap() {
+    const navigate = useNavigate();
     const target = "";
     const {
         ToastMessage,
@@ -70,7 +72,10 @@ function DanhSachCap() {
             setData(DSLinhVuc);
             setSelectedRows(Object.fromEntries(DSLinhVuc.map((row) => [row.MA_LINH_VUC, false])));
         } catch (error) {
-            console.log("fetch failed");
+            console.log(error.message);
+            if (error.message.includes("403")) {
+                navigate("/login");
+            }
         }
     }
     async function handleCreate() {

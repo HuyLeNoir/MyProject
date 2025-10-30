@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal";
 import { TextWithLabel } from "../components/Form";
 import { getCap } from "../services/Services";
+import { getToken } from "../util/util";
 
 import Toast from "../components/Toast";
 import {
@@ -16,7 +17,10 @@ import {
     CheckBox,
 } from "../components/TableOverhaul";
 import { AdminContext } from "../context/Context";
+import { useNavigate } from "react-router-dom";
 function DanhSachCap() {
+    const token = getToken();
+    const navigate = useNavigate();
     const target = "";
     const { ToastMessage, ToastSuccess, ToastDisplay, setToastDisplay, ToastResponse } =
         useContext(AdminContext);
@@ -56,17 +60,22 @@ function DanhSachCap() {
     async function handleGet() {
         try {
             const { capRes, DSCap } = await getCap();
-            setData(DSCap);
-            setSelectedRows(Object.fromEntries(DSCap.map((row) => [row.MA_CAP, false])));
+            if (capRes.ok) {
+                setData(DSCap);
+                setSelectedRows(Object.fromEntries(DSCap.map((row) => [row.MA_CAP, false])));
+            }
         } catch (error) {
-            console.log("fetch failed");
+            console.log(error.message);
+            if (error.message.includes("403")) {
+                navigate("/login");
+            }
         }
     }
     async function handleCreate() {
         try {
             const res = await fetch("/api/admin/danhmuc/cap/", {
                 method: "post",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(inputs),
             });
             ToastResponse(res);

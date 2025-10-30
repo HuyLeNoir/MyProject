@@ -44,7 +44,6 @@ function Login() {
         if (res.ok) {
             const response = await res.json();
             setToastMessage(response.message);
-            console.log(response);
             setToastSuccess(response.success);
 
             if (response.success) {
@@ -52,10 +51,11 @@ function Login() {
                 console.log(response.body.token);
                 setUser(response.body.userData);
                 setTimeout(() => {
-                    if (response.body.ROLE != "Admin") {
+                    if (response.body.userData.role != "Admin") {
                         navigate("/detais");
+                    } else {
+                        navigate("/admin");
                     }
-                    navigate("/admin");
                 }, 2000);
             }
         }
