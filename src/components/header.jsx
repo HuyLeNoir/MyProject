@@ -9,7 +9,6 @@ import { UserContext } from "../context/Context";
 export default function Header({ children }) {
     const navigate = useNavigate();
     const { user, setUser } = useContext(UserContext);
-    console.log("rerendering");
 
     function handleLogout() {
         localStorage.clear();

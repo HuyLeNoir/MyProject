@@ -48,7 +48,7 @@ export function TableCell({ children, className = "", ...props }) {
     );
 }
 
-export function CheckBox({ onChange, checked, className = "", ...props }) {
+export function CheckBox({ onChange, checked = false, className = "", ...props }) {
     return (
         <label className="peer flex justify-center items-center">
             <input

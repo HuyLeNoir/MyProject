@@ -34,7 +34,6 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
     }
     function onSelectGiangVien(user) {
         setOpen(false);
-        console.log("selected ", user);
         setGiangVien({
             input: user.MACB + " - " + user.HO_TEN_USER,
             HO_TEN_USER: user.HO_TEN_USER,

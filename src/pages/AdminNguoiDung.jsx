@@ -56,13 +56,13 @@ export default function AdminNguoiDung() {
     const [educationLevel, setEducationLevel] = useState("");
     const [inputs, setInputs] = useState({});
     const [selectedRows, setSelectedRows] = useState({});
-    const [selectedAmount, setSelectAmount] = useState(0);
     function handleSelectAll(e) {
         const isChecked = e.target.checked;
         const updatedRow = Object.keys(selectedRows).reduce((acc, key) => {
             acc[key] = isChecked;
             return acc;
         }, {});
+        updatedRow.all = e.target.checked;
         setSelectedRows(updatedRow);
     }
     function handleChange(e) {
@@ -85,9 +85,9 @@ export default function AdminNguoiDung() {
         handleGet();
         setInputs({});
     }, []);
-    useEffect(() => {
-        setSelectAmount(Object.values(selectedRows).filter((ID) => ID == true).length);
-    }, [selectedRows]);
+    const selectedAmount = Object.entries(selectedRows).filter(
+        ([key, value]) => value == true && key != "all"
+    ).length;
     //CRUD
     async function handleGet() {
         try {
@@ -493,7 +493,10 @@ export default function AdminNguoiDung() {
                     <TableHead>
                         <TableRow>
                             <TableHeadCell className="w-[5%]">
-                                <CheckBox onChange={handleSelectAll}></CheckBox>
+                                <CheckBox
+                                    checked={selectedRows.all}
+                                    onChange={handleSelectAll}
+                                ></CheckBox>
                             </TableHeadCell>
                             <TableHeadCell className="w-[15%]">Mã người dùng</TableHeadCell>
                             <TableHeadCell className="text-left w-[15%]">MSSV/MSCB</TableHeadCell>

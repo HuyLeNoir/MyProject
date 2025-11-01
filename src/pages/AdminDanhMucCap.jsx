@@ -30,8 +30,7 @@ function DanhSachCap() {
     const [editModal, setEditModal] = useState(target); //edit target
     const [createModal, setCreateModal] = useState(false);
     const [inputs, setInputs] = useState(initialInput);
-    const [selectedRows, setSelectedRows] = useState({});
-    const [selectedAmount, setSelectAmount] = useState(0);
+    const [selectedRows, setSelectedRows] = useState({ all: false });
 
     function handleSelectAll(e) {
         const isChecked = e.target.checked;
@@ -39,6 +38,7 @@ function DanhSachCap() {
             acc[key] = isChecked;
             return acc;
         }, {});
+        updatedRow.all = e.target.checked;
         setSelectedRows(updatedRow);
     }
     function handleChange(e) {
@@ -47,15 +47,15 @@ function DanhSachCap() {
         setInputs((prev) => ({ ...prev, [name]: value })); //name la gia tri cua bien, neu khong co [] se la tao 1 object {name: value}
     }
     function handleSelectRows(ID) {
-        console.log("changing state of ", ID);
         setSelectedRows((prev) => ({ ...prev, [ID]: !prev[ID] }));
     }
     useEffect(() => {
         handleGet();
     }, []);
-    useEffect(() => {
-        setSelectAmount(Object.values(selectedRows).filter((ID) => ID == true).length);
-    }, [selectedRows]);
+    const selectedAmount = Object.entries(selectedRows).filter(
+        ([key, value]) => value == true && key != "all"
+    ).length;
+
     //CRUD
     async function handleGet() {
         try {
@@ -288,7 +288,10 @@ function DanhSachCap() {
                     <TableHead>
                         <TableRow>
                             <TableHeadCell className="w-[5%]">
-                                <CheckBox onChange={handleSelectAll}></CheckBox>
+                                <CheckBox
+                                    checked={selectedRows.all}
+                                    onChange={handleSelectAll}
+                                ></CheckBox>
                             </TableHeadCell>
                             <TableHeadCell className="w-[15%]">Mã cấp</TableHeadCell>
                             <TableHeadCell className="text-left">Tên cấp</TableHeadCell>

@@ -36,18 +36,17 @@ function DanhSachCap() {
     const [editModal, setEditModal] = useState(target); //edit target
 
     const [inputs, setInputs] = useState({ MA_LINH_VUC: "", TEN_LINH_VUC: "", MO_TA_LINH_VUC: "" });
-    const [selectedRows, setSelectedRows] = useState({});
-    const [selectedAmount, setSelectAmount] = useState(0);
+    const [selectedRows, setSelectedRows] = useState({ all: false });
 
     const [openModal, setOpenModal] = useState(false);
 
     function handleSelectAll(e) {
-        console.log("select all");
         const isChecked = e.target.checked;
         const updatedRow = Object.keys(selectedRows).reduce((acc, key) => {
             acc[key] = isChecked;
             return acc;
         }, {});
+        updatedRow.all = e.target.checked;
         setSelectedRows(updatedRow);
     }
     function handleChange(e) {
@@ -56,15 +55,14 @@ function DanhSachCap() {
         setInputs((prev) => ({ ...prev, [name]: value })); //name la gia tri cua bien, neu khong co [] se la tao 1 object {name: value}
     }
     function handleSelectRows(ID) {
-        console.log("changing state of ", ID);
         setSelectedRows((prev) => ({ ...prev, [ID]: !prev[ID] }));
     }
     useEffect(() => {
         handleGet();
     }, []);
-    useEffect(() => {
-        setSelectAmount(Object.values(selectedRows).filter((ID) => ID == true).length);
-    }, [selectedRows]);
+    let selectedAmount = Object.entries(selectedRows).filter(
+        ([key, value]) => value == true && key != "all"
+    ).length;
     //CRUD
     async function handleGet() {
         try {
@@ -119,6 +117,7 @@ function DanhSachCap() {
             handleGet();
         } catch (error) {
             console.log(error.message);
+            showToast(error.message, false);
         }
     }
     return (
@@ -298,7 +297,10 @@ function DanhSachCap() {
                     <TableHead>
                         <TableRow>
                             <TableHeadCell className="w-[5%]">
-                                <CheckBox onChange={handleSelectAll}></CheckBox>
+                                <CheckBox
+                                    checked={selectedRows.all}
+                                    onChange={handleSelectAll}
+                                ></CheckBox>
                             </TableHeadCell>
                             <TableHeadCell className="w-[15%]">Mã lĩnh vực</TableHeadCell>
                             <TableHeadCell className="text-left">Tên lĩnh vực</TableHeadCell>

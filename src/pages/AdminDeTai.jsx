@@ -1,16 +1,17 @@
 import MyButton from "../components/MyButton.jsx";
 import { Datepicker } from "flowbite-react";
-import { getCap, getLinhVuc, getUsers } from "../services/Services.js";
+import { getCap, getDeTai, getLinhVuc, getUsers, getDeTaiByID } from "../services/Services.js";
 import {
     formatDateLocal,
     SinhVienFromUsers,
     GiangVienFromUsers,
     formatCurrency,
     currencyStringToNunber,
+    getToken,
 } from "../util/util.js";
 import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } from "react-icons/hi";
 import { useEffect, useState, useContext, useCallback } from "react";
-import { Outlet, useParams, Link, Navigate, useNavigate } from "react-router-dom";
+import { Outlet, useParams, Link, useNavigate } from "react-router-dom";
 import { TextWithLabel, OnlyText } from "../components/Form.jsx";
 import { AdminContext } from "../context/Context.jsx";
 import Toast from "../components/Toast.jsx";
@@ -31,10 +32,351 @@ import { DeTaiContext } from "../context/Context.jsx";
 
 export function EditDeTai() {
     const { id } = useParams();
-    return <div></div>;
+    const token = getToken();
+    const [capDeTai, setCapDeTai] = useState();
+    const [linhVuc, setLinhVuc] = useState();
+    const { DSCap, DSLinhVuc, DSSinhVien, DSGiangVien } = useContext(DeTaiContext);
+    const { ToastResponse, showToast } = useContext(AdminContext);
+    const [giangVien, setGiangVien] = useState("");
+    const [chuNhiem, setChuNhiem] = useState("");
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [member, setMember] = useState("");
+    const [members, setMembers] = useState({});
+    const [inputs, setInputs] = useState({});
+    useEffect(() => {
+        async function getData() {
+            const { getDeTaiByIDJson } = await getDeTaiByID(id);
+            const data = getDeTaiByIDJson;
+            if (data) {
+                const tempInputs = {
+                    ID_DETAI: data.ID_DETAI,
+                    TEN_DETAI: data.TEN_DETAI,
+                    KINHPHIDUKIEN: String(data.KINHPHIDUKIEN),
+                    KINHPHITHUCTE: String(data.KINHPHITHUCCHI),
+                    TOMTAT_NCKH: data.TOMTAT_NCKH,
+                };
+                setInputs(tempInputs);
+                setLinhVuc(data.TEN_LINH_VUC);
+                setCapDeTai(data.TEN_CAP);
+                setGiangVien({ input: data.GVHD });
+                setStartDate(new Date(data.NGAYBD));
+                setEndDate(new Date(data.NGAYKT));
+                setMembers(
+                    data.THANHVIEN.split(",").reduce((acc, member) => {
+                        const parts = member.split("-");
+                        const mssv = parts[0];
+                        const hoten = parts[1];
+                        const vaitro = parts[2];
+                        acc[mssv] = {
+                            HO_TEN_USER: hoten,
+                            CHU_NHIEM: vaitro == "Chủ nhiệm" ? true : false,
+                        };
+                        return acc;
+                    }, {})
+                );
+                setChuNhiem(
+                    data.THANHVIEN.split(",")
+                        .filter((element) => element.includes("Chủ nhiệm"))[0]
+                        .split("-")
+                        .slice(0, 2)
+                        .join(" - ")
+                );
+            }
+        }
+        getData();
+    }, []);
+
+    async function handleSubmit() {
+        const submitInput = { ...inputs };
+        let membersArray = Object.entries(members).map(([MSSV, USER]) => {
+            const isChuNhiem = chuNhiem ? chuNhiem.split(" - ")[0] === MSSV : false;
+            return {
+                MSSV: MSSV,
+                HO_TEN_USER: USER.HO_TEN_USER,
+                CHU_NHIEM: isChuNhiem,
+            };
+        });
+        submitInput["GVHD"] = giangVien;
+        submitInput["TEN_CAP"] = capDeTai;
+        submitInput["TEN_LINH_VUC"] = linhVuc;
+        submitInput["MEMBERS"] = membersArray;
+        submitInput["NGAYBD"] = formatDateLocal(startDate);
+        submitInput["NGAYKT"] = formatDateLocal(endDate);
+        submitInput["KINHPHIDUKIEN"] = currencyStringToNunber(submitInput["KINHPHIDUKIEN"]);
+        submitInput["KINHPHITHUCTE"] = currencyStringToNunber(submitInput["KINHPHITHUCTE"]);
+        const REQUIRED_FIELDS = [
+            "ID_DETAI",
+            "TEN_DETAI",
+            "GVHD",
+            "KINHPHIDUKIEN",
+            "KINHPHITHUCTE",
+            "TEN_CAP",
+            "TEN_LINH_VUC",
+            "NGAYBD",
+            "NGAYKT",
+            "TOMTAT_NCKH",
+        ];
+
+        // Tìm các trường bị thiếu
+        const missingField = REQUIRED_FIELDS.find((field) => {
+            // Kiểm tra xem giá trị có trống rỗng, null, hoặc undefined không
+            const value = submitInput[field];
+            return !value || (typeof value === "string" && value.trim() === "");
+        });
+
+        // Kiểm tra trường hợp MEMBERS (phải có ít nhất 1 người)
+        if (!submitInput["MEMBERS"] || submitInput["MEMBERS"].length === 0) {
+            showToast("Vui lòng thêm ít nhất 1 thành viên.", false);
+            return;
+        }
+
+        // Nếu tìm thấy trường bị thiếu, dừng lại và hiển thị lỗi
+        if (missingField) {
+            showToast(`Trường "${missingField}" là bắt buộc!`, false);
+            return;
+        }
+        try {
+            console.log(submitInput);
+            const res = await fetch(`/api/admin/detais/${submitInput.ID_DETAI}`, {
+                method: "put",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify(submitInput),
+            });
+            ToastResponse(res);
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+    const giangVienKHMT = DSGiangVien;
+    function resetInput() {
+        setInputs({});
+        setLinhVuc("");
+        setCapDeTai("");
+        setGiangVien("");
+        setMember("");
+        setMembers({});
+        setChuNhiem("");
+        setStartDate(null);
+        setEndDate(null);
+    }
+    const handleChange = useCallback(
+        (e) => {
+            const name = e.target.name;
+            const value = e.target.value;
+            setInputs((prev) => ({ ...prev, [name]: value }));
+        },
+        [setInputs]
+    );
+    function handleMemberChange(e) {
+        setMember(e.target.value);
+    }
+
+    const handleAddMember = useCallback(() => {
+        const sinhvien = DSSinhVien.find((sinhvien) => sinhvien.MSSV == member);
+        if (!sinhvien) {
+            showToast(`Không tìm thấy ${member}`, false);
+            return;
+        }
+        setMembers((prev) => ({
+            ...prev,
+            [sinhvien.MSSV]: { HO_TEN_USER: sinhvien.HO_TEN_USER, CHU_NHIEM: false },
+        }));
+
+        setMember(""); //reset lai input
+    }, [member, DSSinhVien, showToast, setMembers, setMember]);
+    return (
+        <>
+            <div className="flex gap-2.5 justify-left items-center">
+                <MyButton className="bg-buttonColor aspect-square h-12">
+                    <Link to="/admin/detais">
+                        <HiArrowLeft size={32}></HiArrowLeft>
+                    </Link>
+                </MyButton>
+                <h1 className="text-h2 font-semibold my-2.5">Thêm một đề tài mới</h1>
+            </div>
+            <div className="relative bg-white p-5 shadow-md border-1 flex flex-col items-start gap-2.5 border-gray-200">
+                <TextWithLabel
+                    name="ID_DETAI"
+                    className="w-150"
+                    id="ID_DETAI"
+                    value={inputs.ID_DETAI || ""}
+                    disabled={true}
+                    onChange={handleChange}
+                >
+                    Mã đề tài
+                </TextWithLabel>
+                <TextWithLabel
+                    value={inputs.TEN_DETAI || ""}
+                    onChange={handleChange}
+                    name="TEN_DETAI"
+                    className="w-full"
+                    id="TEN_DETAI"
+                >
+                    Tên đề tài
+                </TextWithLabel>
+                <div className="flex z-10 px-2 gap-2.5">
+                    <DropDown
+                        size="large"
+                        fieldName={"Lĩnh vực"}
+                        options={DSLinhVuc}
+                        select={linhVuc}
+                        setSelect={setLinhVuc}
+                    ></DropDown>
+                    <DropDown
+                        size="large"
+                        fieldName={"Cấp đề tài"}
+                        options={DSCap}
+                        select={capDeTai}
+                        setSelect={setCapDeTai}
+                    ></DropDown>
+                    <TextInput
+                        size="large"
+                        giangVien={giangVien}
+                        setGiangVien={setGiangVien}
+                        users={giangVienKHMT}
+                        fieldName={"Giảng viên hướng dẫn"}
+                    ></TextInput>
+                </div>
+                <div className="flex gap-2.5 items-center justify-center">
+                    <TextWithLabel
+                        id="member"
+                        value={member || ""}
+                        name="member"
+                        onChange={handleMemberChange}
+                        placeHolder="Nhập MSSV để thêm"
+                    >
+                        Thành viên tham gia
+                    </TextWithLabel>
+
+                    <button
+                        onClick={handleAddMember}
+                        className="bg-buttonColor flex items-center justify-center rounded-true aspect-square cursor-pointer hover:shadow-xs h-10"
+                    >
+                        <HiPlus size={24} />
+                    </button>
+                </div>
+                <Table className="w-150">
+                    <TableHead>
+                        <TableRow>
+                            <TableHeadCell>STT</TableHeadCell>
+                            <TableHeadCell>Họ và tên</TableHeadCell>
+                            <TableHeadCell>MSSV</TableHeadCell>
+                            <TableHeadCell>Tuỳ chọn</TableHeadCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {Object.entries(members).map(([MSSV, USER], index) => (
+                            <TableRow key={index}>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>{USER.HO_TEN_USER}</TableCell>
+                                <TableCell>{MSSV}</TableCell>
+                                <TableCell>
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <MyButton
+                                            onClick={() => {
+                                                const newMembers = { ...members };
+                                                delete newMembers[MSSV];
+                                                setMembers(newMembers);
+                                            }}
+                                            IconLeft={
+                                                <HiTrash size={24} className="text-redWarning" />
+                                            }
+                                        ></MyButton>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <DropDown
+                    className="z-9"
+                    size="large"
+                    options={Object.entries(members).map(
+                        ([MSSV, { HO_TEN_USER }]) => MSSV + " - " + HO_TEN_USER
+                    )}
+                    select={chuNhiem}
+                    setSelect={setChuNhiem}
+                    fieldName={"Chủ nhiệm đề tài"}
+                ></DropDown>
+                <label htmlFor="NgayBD" className="px-2">
+                    Ngày bắt đầu
+                </label>
+                <Datepicker
+                    placeholder="Chọn ngày"
+                    value={startDate || new Date()}
+                    id="NgayBD"
+                    language="vi"
+                    onChange={(selectedDate) => {
+                        setStartDate(selectedDate);
+                    }}
+                    className="font-display"
+                ></Datepicker>
+                <label htmlFor="NgayKT" className="px-2">
+                    Ngày kết thúc
+                </label>
+
+                <Datepicker
+                    placeholder="Chọn ngày"
+                    value={endDate || new Date()}
+                    minDate={startDate || new Date()}
+                    id="NgayKT"
+                    language="vi"
+                    onChange={(selectedDate) => {
+                        setEndDate(selectedDate);
+                    }}
+                    className="font-display"
+                ></Datepicker>
+                <div className="flex gap-2.5">
+                    <TextWithLabel
+                        id="KINHPHIDUKIEN"
+                        name="KINHPHIDUKIEN"
+                        value={formatCurrency(inputs.KINHPHIDUKIEN) || ""}
+                        onChange={handleChange}
+                    >
+                        Kinh phí dự kiến
+                    </TextWithLabel>
+                    <TextWithLabel
+                        id="KINHPHITHUCTE"
+                        name="KINHPHITHUCTE"
+                        value={formatCurrency(inputs.KINHPHITHUCTE) || ""}
+                        onChange={handleChange}
+                    >
+                        Kinh phí thực tế
+                    </TextWithLabel>
+                </div>
+                <label htmlFor="tomtat">Tóm tắt đề tài</label>
+                <textarea
+                    value={inputs.TOMTAT_NCKH || ""}
+                    name="TOMTAT_NCKH"
+                    id="TOMTAT_NCKH"
+                    className="w-full border rounded-md h-100"
+                    onChange={handleChange}
+                ></textarea>
+                <div className="flex w-full gap-2.5 justify-between flex-row-reverse  items-center">
+                    <MyButton
+                        onClick={handleSubmit}
+                        size="large"
+                        className="bg-primaryColor text-white"
+                    >
+                        Tạo
+                    </MyButton>
+                    <MyButton
+                        onClick={() => {
+                            resetInput();
+                        }}
+                        size="large"
+                        variant="underline"
+                        className="text-textColor2 border-textColor3"
+                    >
+                        Huỷ
+                    </MyButton>
+                </div>
+            </div>
+        </>
+    );
 }
 export function NewDeTai() {
-    console.log("new detai rerender");
     //test data
     const {
         capDeTai,
@@ -55,9 +397,6 @@ export function NewDeTai() {
     const [member, setMember] = useState("");
     const [members, setMembers] = useState({});
     const [inputs, setInputs] = useState({});
-    function handleGet() {
-        console.log("fetching detais");
-    }
     async function handleSubmit() {
         const submitInput = { ...inputs };
 
@@ -116,8 +455,8 @@ export function NewDeTai() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(submitInput),
             });
+
             ToastResponse(res);
-            handleGet();
         } catch (error) {
             console.log(error.message);
         }
@@ -350,9 +689,12 @@ export function NewDeTai() {
     );
 }
 export function DanhSachDeTai() {
+    const token = getToken();
+    const navigate = useNavigate();
     const [data, setData] = useState([]);
     const { capDeTai, setCapDeTai, linhVuc, setLinhVuc, DSCap, DSLinhVuc } =
         useContext(DeTaiContext);
+    const { showToast, ToastResponse } = useContext(AdminContext);
     const [searchValue, setSearchValue] = useState("");
     const [filterIsOpen, setFilterIsOpen] = useState(false);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
@@ -360,6 +702,41 @@ export function DanhSachDeTai() {
     const [currentPage, setCurrentPage] = useState(0);
     const [rowPerPage, setRowPerPage] = useState(5);
     const [selectedRows, setSelectedRows] = useState({ DT01: false, DT02: false });
+    useEffect(() => {
+        console.log(data);
+    }, [data]);
+
+    async function handleDelete(id) {
+        try {
+            const res = await fetch(`/api/admin/detais/${id}`, {
+                method: "delete",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            ToastResponse(res);
+        } catch (error) {
+            showToast(error.message, false);
+        }
+    }
+    async function handleGet() {
+        try {
+            const { getDeTaiRes, DSDeTai } = await getDeTai();
+            if (getDeTaiRes.ok) {
+                setData(DSDeTai);
+                setSelectedRows(Object.fromEntries(DSDeTai.map((row) => [row.ID_DETAI, false])));
+            }
+        } catch (error) {
+            console.log(error.message);
+            if (error.message.includes("403")) {
+                navigate("/login");
+            }
+        }
+    }
+    useEffect(() => {
+        async function get() {
+            await handleGet();
+        }
+        get();
+    }, []);
     function handleChange(e) {
         setSearchValue(e.target.value);
     }
@@ -375,22 +752,20 @@ export function DanhSachDeTai() {
         setFilterIsOpen(false);
     }
     function handleSelectAll(e) {
-        console.log("select all");
         const isChecked = e.target.checked;
         const updatedRow = Object.keys(selectedRows).reduce((acc, key) => {
             acc[key] = isChecked;
             return acc;
         }, {});
+        updatedRow.all = e.target.checked;
         setSelectedRows(updatedRow);
     }
     function handleSelectRows(ID) {
-        console.log("changing state of ", ID);
         setSelectedRows((prev) => ({ ...prev, [ID]: !prev[ID] }));
     }
-    function calcSelecting() {
-        return Object.values(selectedRows).filter((ID) => ID == true).length;
-    }
-    let selectedAmount = calcSelecting();
+    const selectedAmount = Object.entries(selectedRows).filter(
+        ([key, value]) => value == true && key != "all"
+    ).length;
 
     return (
         <>
@@ -411,7 +786,7 @@ export function DanhSachDeTai() {
                             onClick={() => {
                                 let targets = Object.entries(selectedRows).filter(
                                     ([key, value]) => value == true //loc ra cac row ma selected la true
-                                ); //chuyen thanh obj
+                                );
                                 targets.forEach(([key]) => {
                                     handleDelete(key);
                                     setDisplayConfirmModal(false);
@@ -530,7 +905,10 @@ export function DanhSachDeTai() {
                     <TableHead>
                         <TableRow>
                             <TableHeadCell>
-                                <CheckBox onChange={handleSelectAll}></CheckBox>
+                                <CheckBox
+                                    checked={selectedRows.all}
+                                    onChange={handleSelectAll}
+                                ></CheckBox>
                             </TableHeadCell>
                             <TableHeadCell className="w-[15%]">Mã đề tài</TableHeadCell>
                             <TableHeadCell className="text-left">Tên</TableHeadCell>
@@ -539,43 +917,24 @@ export function DanhSachDeTai() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        <TableRow>
-                            <TableCell>
-                                <CheckBox
-                                    onChange={() => {
-                                        handleSelectRows("DT01");
-                                    }}
-                                    checked={selectedRows["DT01"]}
-                                ></CheckBox>
-                            </TableCell>
-                            <TableCell className="text-center">DT01</TableCell>
-                            <TableCell className="hover:underline hover:cursor-pointer">
-                                <Link to="edit/DT01">
-                                    Đánh giá trình độ và năng lực công nghệ sản xuất của doanh
-                                    nghiệp và các ngành, lĩnh vực sản xuất trên địa bàn thành phố
-                                    Cần Thơ
-                                </Link>
-                            </TableCell>
-                            <TableCell className="text-center">Địa phương</TableCell>
-                            <TableCell className="text-center">Kinh tế</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>
-                                <CheckBox
-                                    onChange={() => {
-                                        handleSelectRows("DT02");
-                                    }}
-                                    checked={selectedRows["DT02"]}
-                                ></CheckBox>
-                            </TableCell>
-                            <TableCell className="text-center">DT02</TableCell>
-                            <TableCell>
-                                Đánh giá trình độ và năng lực công nghệ sản xuất của doanh nghiệp và
-                                các ngành, lĩnh vực sản xuất trên địa bàn thành phố Cần Thơ
-                            </TableCell>
-                            <TableCell className="text-center">Địa phương</TableCell>
-                            <TableCell className="text-center">Kinh tế</TableCell>
-                        </TableRow>
+                        {data.map(({ ID_DETAI, TEN_DETAI, TEN_CAP, TEN_LINH_VUC }) => (
+                            <TableRow key={ID_DETAI}>
+                                <TableCell>
+                                    <CheckBox
+                                        onChange={() => {
+                                            handleSelectRows(ID_DETAI);
+                                        }}
+                                        checked={selectedRows[ID_DETAI]}
+                                    ></CheckBox>
+                                </TableCell>
+                                <TableCell className="text-center">{ID_DETAI}</TableCell>
+                                <TableCell className="hover:underline hover:cursor-pointer">
+                                    <Link to={`edit/${ID_DETAI}`}>{TEN_DETAI}</Link>
+                                </TableCell>
+                                <TableCell className="text-center">{TEN_CAP}</TableCell>
+                                <TableCell className="text-center">{TEN_LINH_VUC}</TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
                 <Pagination
@@ -606,7 +965,6 @@ export function DeTai() {
 
     useEffect(() => {
         async function getData() {
-            console.log("getData was called?");
             const { cap, DSCap } = await getCap();
             const { linhvucRes, DSLinhVuc } = await getLinhVuc();
             const { usersRes, DSUser } = await getUsers();
@@ -619,14 +977,7 @@ export function DeTai() {
         }
         getData();
     }, []);
-    useEffect(() => {
-        setToastDisplay(true);
-        setToastSuccess(true);
-        setToastMessage("Hi");
-    }, []);
-    useEffect(() => {
-        console.log(DSCap);
-    }, [DSCap]);
+
     return (
         <DeTaiContext.Provider
             value={{
