@@ -3,6 +3,11 @@ export function formatDateLocal(date) {
     const pad = (n) => String(n).padStart(2, "0");
     return [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join("-");
 }
+export function formatToDisplayDate(date) {
+    if (!date) return;
+    const pad = (n) => String(n).padStart(2, "0");
+    return [pad(date.getDate()), pad(date.getMonth() + 1), date.getFullYear()].join("/");
+}
 export function currencyStringToNunber(str) {
     if (!str) {
         return;
@@ -12,6 +17,9 @@ export function currencyStringToNunber(str) {
 export function formatCurrency(value) {
     if (!value) {
         return;
+    }
+    if (typeof value == Number) {
+        return value.toLocaleString("vi-VN");
     }
     //value -> number
     const temp = Number(value.replace(/\./g, ""));

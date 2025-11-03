@@ -71,3 +71,58 @@ export async function getDeTaiByID(id) {
         throw new Error(`Fetch failed with status: ${res.status}`);
     }
 }
+
+export async function getSeminars() {
+    const token = getToken();
+    const res = await fetch("/api/admin/seminars", {
+        method: "get",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+        const json = await res.json();
+        return { res, json };
+    } else {
+        throw new Error(`Fetch failed with status: ${res.status}`);
+    }
+}
+export async function getSeminarByID(id) {
+    const token = getToken();
+    const res = await fetch(`/api/admin/seminars/${id}`, {
+        method: "get",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+        const json = await res.json();
+        console.log("fetching seminar by id");
+        return { res, json };
+    } else {
+        throw new Error(`Fetch failed with status: ${res.status}`);
+    }
+}
+
+export async function getProjects() {
+    const token = getToken();
+    const res = await fetch("/api/admin/projects", {
+        method: "get",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+        const json = await res.json();
+        return { res, json };
+    } else {
+        throw new Error(`Fetch failed with status: ${res.status}`);
+    }
+}
+export async function getProjectByID(id) {
+    const token = getToken();
+    const res = await fetch(`/api/admin/project/${id}`, {
+        method: "get",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+        const json = await res.json();
+        return { res, json };
+    } else {
+        throw new Error(`Fetch failed with status: ${res.status}`);
+    }
+}

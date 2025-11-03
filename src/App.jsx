@@ -8,11 +8,12 @@ import Login from "./pages/Login";
 import Admin, {
     Dashboard as AdminDashboard,
     BaiBao as AdminBaiBao,
-    ChuyenDe as AdminChuyenDe,
-    DuAn as AdminDuAn,
     GiangVien as AdminGiangVien,
 } from "./pages/Admin";
 import { DeTai as AdminDeTai, DanhSachDeTai, NewDeTai, EditDeTai } from "./pages/AdminDeTai";
+import { AdminChuyenDe, DanhSachChuyenDe, NewChuyenDe, EditChuyenDe } from "./pages/AdminChuyenDe";
+import { AdminProject, DanhSachProject, EditProject, NewProject } from "./pages/AdminProject";
+
 import AdminNguoiDung from "./pages/AdminNguoiDung";
 import AdminDanhMucCap from "./pages/AdminDanhMucCap";
 import AdminDanhMucLinhVuc from "./pages/AdminDanhMucLinhVuc";
@@ -70,11 +71,18 @@ function AppContent() {
                         <Route path="new" element={<NewDeTai />}></Route>
                         <Route path="edit/:id" element={<EditDeTai />}></Route>
                     </Route>
-                    <Route path="publications" element={<AdminBaiBao />} />
+                    <Route path="publications" element={<AdminBaiBao />}></Route>
 
-                    <Route path="seminars" element={<AdminChuyenDe />} />
-
-                    <Route path="projects" element={<AdminDuAn />} />
+                    <Route path="seminars" element={<AdminChuyenDe />}>
+                        <Route index element={<DanhSachChuyenDe />}></Route>
+                        <Route path="new" element={<NewChuyenDe />}></Route>
+                        <Route path="edit/:id" element={<EditChuyenDe />}></Route>
+                    </Route>
+                    <Route path="projects" element={<AdminProject />}>
+                        <Route index element={<DanhSachProject />}></Route>
+                        <Route path="new" element={<NewProject />}></Route>
+                        <Route path="edit/:id" element={<EditProject />}></Route>
+                    </Route>
 
                     <Route path="teachers" element={<AdminGiangVien />} />
                     <Route path="users" element={<AdminNguoiDung />} />

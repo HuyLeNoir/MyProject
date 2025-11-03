@@ -13,9 +13,6 @@ export function Dashboard() {
 export function BaiBao() {
     return <div>Admin Bài Báo</div>;
 }
-export function ChuyenDe() {
-    return <div>Admin Chuyên Đề</div>;
-}
 export function DuAn() {
     return <div>Admin Dự Án</div>;
 }
