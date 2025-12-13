@@ -15,7 +15,7 @@ import {
     TableHead,
     TableBody,
     CheckBox,
-} from "../components/TableOverhaul";
+} from "../components/Table";
 import { useNavigate } from "react-router-dom";
 function DanhSachCap() {
     const navigate = useNavigate();
@@ -289,7 +289,7 @@ function DanhSachCap() {
                         size="small"
                         className="bg-successColor justify-center text-textColor1"
                     >
-                        Thêm đề tài
+                        Thêm
                     </MyButton>
                 </div>
 

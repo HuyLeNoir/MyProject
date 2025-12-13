@@ -1,5 +1,5 @@
 import { HiChevronDown } from "react-icons/hi";
-import LabeledText from "./LabeledText";
+import LabeledText from "../LabeledText";
 function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
     return (
         <>
@@ -21,11 +21,11 @@ function TRow({ row, handleRowOpening, isOpen, fields, index, children }) {
                     ></HiChevronDown>
                     <span>{row[fields[1]]}</span>
                 </td>
-                {
-                    fields.slice(2).map(field=>(
-                        <td key={field + index} className="text-center px-4 py-2">{row[field]}</td>
-                    ))
-                }
+                {fields.slice(2).map((field) => (
+                    <td key={field + index} className="text-center px-4 py-2">
+                        {row[field]}
+                    </td>
+                ))}
             </tr>
             <tr key={row[fields[0]] + "detailed"}>
                 <td colSpan={fields.length - 1}>{children}</td>
@@ -83,7 +83,9 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
                 </ol>
             </div>
             <div className="flex flex-col">
-                <span className="text-K2D text-primaryColor">Các đề tài nghiên cứu khoa học có liên quan:</span>
+                <span className="text-K2D text-primaryColor">
+                    Các đề tài nghiên cứu khoa học có liên quan:
+                </span>
                 <ol className="list-decimal list-inside p-2 flex flex-col">
                     {row.cacDeTaiLienQuan.map((detai, index) => (
                         <li key={detai + " " + index}>{detai}</li>
@@ -99,24 +101,22 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
                 isOpen ? "max-h-160" : "max-h-0"
             } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-in-out`}
         >
-            <LabeledText label="Nội dung báo cáo">
-                {row.noiDungBaoCao}
-            </LabeledText>
+            <LabeledText label="Nội dung báo cáo">{row.noiDungBaoCao}</LabeledText>
             {/* TODO: chuyen nguon tham khao thanh accordion */}
         </div>
     );
     const renderContent = () => {
-    switch (fields[0]) {
-        case "maDeTai":
-            return renderDeTai();
-        case "maBaiBao":
-            return renderBaiBao();
-        case "maChuyenDe":
-            return renderChuyenDe();
-        default:
-            return null;
-    }
-};
+        switch (fields[0]) {
+            case "maDeTai":
+                return renderDeTai();
+            case "maBaiBao":
+                return renderBaiBao();
+            case "maChuyenDe":
+                return renderChuyenDe();
+            default:
+                return null;
+        }
+    };
     return (
         <>
             <TRow
@@ -126,7 +126,6 @@ export default function AccordionTableRow({ isOpen, handleRowOpening, row, field
                 index={index}
                 handleRowOpening={handleRowOpening}
             >
-                {/* children: just make a div containing detailed information :> */}
                 {renderContent()}
             </TRow>
         </>

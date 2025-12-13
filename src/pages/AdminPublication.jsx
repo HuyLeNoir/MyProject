@@ -1,34 +1,22 @@
 import MyButton from "../components/MyButton.jsx";
-import { Datepicker, Dropdown } from "flowbite-react";
 import {
-    getCap,
-    getLinhVuc,
     getUsers,
-    getSeminarByID,
-    getSeminars,
-    getProjects,
-    getProjectByID,
-    queryProjects,
+    getPublications,
+    getPublicationByID,
+    getType,
+    queryPublications,
 } from "../services/Services.js";
 import {
-    formatDateLocal,
-    SinhVienFromUsers,
     GiangVienFromUsers,
-    formatCurrency,
-    currencyStringToNunber,
-    getToken,
+    formatDisplayDateToSQLDate,
     formatToDisplayDate,
+    getToken,
 } from "../util/util.js";
 import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } from "react-icons/hi";
 import { useEffect, useState, useContext, useCallback } from "react";
 import { Outlet, useParams, Link, useNavigate } from "react-router-dom";
 import { TextWithLabel, OnlyText } from "../components/Form.jsx";
-import {
-    AdminContext,
-    ChuyenDeContext,
-    GlobalContext,
-    ProjectContext,
-} from "../context/Context.jsx";
+import { AdminContext, GlobalContext, PublicationContext } from "../context/Context.jsx";
 import Toast from "../components/Toast.jsx";
 import {
     Table,
@@ -43,45 +31,57 @@ import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal.
 import DropDown from "../components/Dropdown.jsx";
 import TextInput from "../components/InputGiangVien.jsx";
 import Pagination from "../components/Pagination.jsx";
-import { DeTaiContext } from "../context/Context.jsx";
 
-export function EditProject() {
-    const [loading, setLoading] = useState(false);
+export function EditPublication() {
     const { id } = useParams();
     const [inputs, setInputs] = useState({});
-    const [ngayBD, setNgayBD] = useState(new Date());
-    const [ngayKT, setNgayKT] = useState(new Date());
+    const [type, setType] = useState(""); //loai cua bai bao
+    const [nguonThamKhao, setNguonThamKhao] = useState("");
+    const [listNguonThamKhao, setListNguonThamKhao] = useState([]);
     const [members, setMembers] = useState([]);
-    const [cap, setCap] = useState("");
     const token = getToken();
     const [giangVien, setGiangVien] = useState("");
-    const { DSGiangVien, DSCap } = useContext(ProjectContext);
+    const { DSGiangVien, types } = useContext(PublicationContext);
     const { showToast, ToastResponse } = useContext(AdminContext);
     //test data
     useEffect(() => {
         async function getData() {
             try {
-                const { res, json } = await getProjectByID(id);
+                const { res, json } = await getPublicationByID(id);
                 const {
-                    ID_PROJECT,
-                    TEN_PROJECT,
-                    TEN_CAP,
+                    DOI_BAIBAO,
+                    ID_BAIBAO,
+                    KEYWORD_BAIBAO,
+                    LOAI_BAIBAO,
+                    NAM_BAIBAO,
+                    SOTAP_TAPCHI,
+                    TEN_BAIBAO,
+                    TEN_TAPCHI,
                     THANHVIEN,
-                    MOTA_PROJECT,
-                    KINHPHI_PROJECT,
-                    NGAYBD_PROJECT,
-                    NGAYKT_PROJECT,
+                    TOMTAT_BAIBAO,
+                    NGUONTHAMKHAO,
+                    TRICHDAN_BAIBAO,
+                    TEN_HOITHAO,
+                    DIADIEM_HOITHAO,
                 } = json;
+
                 setInputs({
-                    ID_PROJECT: ID_PROJECT,
-                    TEN_PROJECT: TEN_PROJECT,
-                    MOTA_PROJECT: MOTA_PROJECT,
-                    KINHPHI_PROJECT: KINHPHI_PROJECT.toString(),
+                    ID_BAIBAO: ID_BAIBAO,
+                    KEYWORD_BAIBAO: KEYWORD_BAIBAO,
+                    LOAI_BAIBAO: LOAI_BAIBAO,
+                    NAM_BAIBAO: formatToDisplayDate(new Date(NAM_BAIBAO)),
+                    SOTAP_TAPCHI: SOTAP_TAPCHI,
+                    TEN_BAIBAO: TEN_BAIBAO,
+                    TEN_TAPCHI: TEN_TAPCHI,
+                    TOMTAT_BAIBAO: TOMTAT_BAIBAO,
+                    TRICHDAN_BAIBAO: TRICHDAN_BAIBAO,
+                    TEN_HOITHAO: TEN_HOITHAO,
+                    DIADIEM_HOITHAO: DIADIEM_HOITHAO,
+                    DOI_BAIBAO: DOI_BAIBAO,
                 });
+                setType(LOAI_BAIBAO);
                 setMembers(THANHVIEN.split(","));
-                setCap(TEN_CAP);
-                setNgayBD(new Date(NGAYBD_PROJECT));
-                setNgayKT(new Date(NGAYKT_PROJECT));
+                setListNguonThamKhao(NGUONTHAMKHAO.split(";"));
                 console.log(json);
             } catch (error) {
                 console.log(error.message);
@@ -89,6 +89,7 @@ export function EditProject() {
         }
         getData();
     }, []);
+
     function handleAddMember() {
         console.log("added", giangVien.input);
         if (members.find((member) => member.includes(giangVien.input))) {
@@ -101,20 +102,38 @@ export function EditProject() {
     }
     async function handleSubmit() {
         const submitInput = { ...inputs };
-        submitInput["NGAYBD_PROJECT"] = formatDateLocal(ngayBD);
-        submitInput["NGAYKT_PROJECT"] = formatDateLocal(ngayKT);
         submitInput["THANHVIEN"] = members;
-        submitInput["CAP_PROJECT"] = cap;
-        submitInput["KINHPHI_PROJECT"] = currencyStringToNunber(inputs["KINHPHI_PROJECT"]);
+        submitInput["NGUONTHAMKHAO"] = listNguonThamKhao;
+        submitInput["LOAI_BAIBAO"] = type;
+        submitInput["NAM_BAIBAO"] = formatDisplayDateToSQLDate(submitInput["NAM_BAIBAO"]);
         const REQUIRED_FIELDS = [
-            "ID_PROJECT",
-            "CAP_PROJECT",
-            "TEN_PROJECT",
-            "NGAYBD_PROJECT",
-            "NGAYKT_PROJECT",
-            "KINHPHI_PROJECT",
-            "MOTA_PROJECT",
+            "ID_BAIBAO",
+            "TEN_BAIBAO",
+            "LOAI_BAIBAO",
+            "NAM_BAIBAO",
+            "DOI_BAIBAO",
+            "KEYWORD_BAIBAO",
+            "TRICHDAN_BAIBAO",
+            "TOMTAT_BAIBAO",
         ];
+        if (type == "Tạp chí khoa học") {
+            REQUIRED_FIELDS.push("TEN_TAPCHI");
+            REQUIRED_FIELDS.push("SOTAP_TAPCHI");
+            submitInput["DIADIEM_HOITHAO"] = null;
+            submitInput["TEN_HOITHAO"] = null;
+            setInputs((prev) => ({ ...prev, DIADIEM_HOITHAO: "", TEN_HOITHAO: "" }));
+        } else if (type == "Hội thảo khoa học") {
+            REQUIRED_FIELDS.push("TEN_HOITHAO");
+            REQUIRED_FIELDS.push("DIADIEM_HOITHAO");
+            submitInput["SOTAP_TAPCHI"] = null;
+            submitInput["TEN_TAPCHI"] = null;
+            setInputs((prev) => ({ ...prev, SOTAP_TAPCHI: "", TEN_TAPCHI: "" }));
+        } else {
+            submitInput["DIADIEM_HOITHAO"] = null;
+            submitInput["TEN_HOITHAO"] = null;
+            submitInput["SOTAP_TAPCHI"] = null;
+            submitInput["TEN_TAPCHI"] = null;
+        }
         // Tìm các trường bị thiếu
         const missingField = REQUIRED_FIELDS.find((field) => {
             // Kiểm tra xem giá trị có trống rỗng, null, hoặc undefined không
@@ -131,106 +150,103 @@ export function EditProject() {
             showToast(`Trường "${missingField}" là bắt buộc!`, false);
             return;
         }
-        console.log(submitInput);
+        let res;
         try {
             console.log(submitInput);
-            const res = await fetch(`/api/admin/projects/${id}`, {
+            res = await fetch(`/api/admin/publications/${id}`, {
                 method: "put",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(submitInput),
             });
-            ToastResponse(res);
         } catch (error) {
             console.log(error.message);
+        } finally {
+            ToastResponse(res);
         }
     }
 
     const handleChange = useCallback((e) => {
         const name = e.target.name;
         const value = e.target.value;
-        console.log(name);
-        if (name == "KINHPHI_PROJECT" && !/^\d*$/.test(value.replace(/\./g, ""))) {
-            return;
-        }
         setInputs((prev) => ({ ...prev, [name]: value }));
     });
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+
     return (
         <>
             <div className="flex gap-2.5 justify-left items-center">
                 <MyButton className="bg-buttonColor aspect-square h-12">
-                    <Link to="/admin/projects">
+                    <Link to="/admin/publications">
                         <HiArrowLeft size={32}></HiArrowLeft>
                     </Link>
                 </MyButton>
-                <h1 className="text-h2 font-semibold my-2.5">Thêm một dự án mới</h1>
+                <h1 className="text-h2 font-semibold my-2.5">Thêm một bài báo mới</h1>
             </div>
             <div className="relative bg-white p-5 shadow-md border-1 flex flex-col items-start gap-2.5 border-gray-200">
                 <TextWithLabel
+                    className="w-full"
                     disabled={true}
                     onChange={handleChange}
-                    placeHolder="Nhập mã dự án"
-                    name="ID_PROJECT"
-                    value={inputs.ID_PROJECT || ""}
+                    placeHolder="Nhập mã bài báo"
+                    name="ID_BAIBAO"
+                    value={inputs.ID_BAIBAO || ""}
                 >
-                    Mã dự án
+                    Mã bài báo
                 </TextWithLabel>
                 <TextWithLabel
-                    placeHolder="Nhập tên dự án"
+                    placeHolder="Nhập tên bài báo"
                     className="w-full"
                     onChange={handleChange}
-                    name="TEN_PROJECT"
-                    value={inputs.TEN_PROJECT || ""}
+                    name="TEN_BAIBAO"
+                    value={inputs.TEN_BAIBAO || ""}
                 >
-                    Tên dự án
+                    Tên bài báo
                 </TextWithLabel>
-                <div className="flex gap-40 items-center">
-                    <div className="flex gap-2.5 items-end">
-                        <TextWithLabel
-                            onChange={handleChange}
-                            placeHolder="Nhập kinh phí dự án"
-                            name="KINHPHI_PROJECT"
-                            value={formatCurrency(inputs.KINHPHI_PROJECT) || ""}
-                        >
-                            Kinh phí của dự án
-                        </TextWithLabel>
-                        <span>VND</span>
-                    </div>
-                    <DropDown
-                        className="z-10"
-                        direction="vertical"
-                        select={cap}
-                        setSelect={setCap}
-                        size="medium"
-                        fieldName="Cấp dự án"
-                        options={DSCap}
-                    ></DropDown>
-                </div>
-                <div className="flex gap-5">
-                    <div>
-                        <label htmlFor="ngaybd">Ngày bắt đầu dự án</label>
-                        <Datepicker
-                            name="NGAYBD_PROJECT"
-                            value={ngayBD}
-                            onChange={(selectedDate) => setNgayBD(selectedDate)}
-                            id="ngaybd"
-                            language="vi-vn"
-                        ></Datepicker>
-                    </div>
-                    <div>
-                        <label htmlFor="ngaykt">Ngày hoàn thành dự án</label>
-                        <Datepicker
-                            name="NGAYKT_PROJECT"
-                            value={ngayKT}
-                            minDate={ngayBD}
-                            onChange={(selectedDate) => setNgayKT(selectedDate)}
-                            id="ngaykt"
-                            language="vi-vn"
-                        ></Datepicker>
-                    </div>
-                </div>
+                <TextWithLabel
+                    placeHolder="Nhập DOI của bài báo"
+                    className="w-full"
+                    onChange={handleChange}
+                    name="DOI_BAIBAO"
+                    value={inputs.DOI_BAIBAO || ""}
+                >
+                    DOI
+                </TextWithLabel>
+                <TextWithLabel
+                    placeHolder="Nhập trích dẫn của bài báo"
+                    className="w-full"
+                    onChange={handleChange}
+                    name="TRICHDAN_BAIBAO"
+                    value={inputs.TRICHDAN_BAIBAO || ""}
+                >
+                    Trích dẫn
+                </TextWithLabel>
+                <TextWithLabel
+                    type="text"
+                    placeHolder="Ngày công bố"
+                    className="w-50"
+                    onChange={handleChange}
+                    name="NAM_BAIBAO"
+                    value={inputs.NAM_BAIBAO || ""}
+                >
+                    Ngày công bố
+                </TextWithLabel>
+                <label htmlFor="keywords">Keywords</label>
+                <textarea
+                    placeholder="Những từ khoá của bài báo"
+                    name="KEYWORD_BAIBAO"
+                    value={inputs.KEYWORD_BAIBAO || ""}
+                    onChange={handleChange}
+                    id="keywords"
+                    className=" p-2 w-full border rounded-md h-20"
+                ></textarea>
+                <label htmlFor="tomtat">Tóm tắt</label>
+                <textarea
+                    placeholder="Tóm tắt của bài báo"
+                    name="TOMTAT_BAIBAO"
+                    value={inputs.TOMTAT_BAIBAO || ""}
+                    onChange={handleChange}
+                    id="tomtat"
+                    className="w-full p-2 border rounded-md h-100"
+                ></textarea>
                 <div className="flex gap-2.5">
                     <TextInput
                         size="large"
@@ -282,16 +298,120 @@ export function EditProject() {
                             ))}
                     </TableBody>
                 </Table>
+                <div className="flex w-150 items-center gap-2.5">
+                    <TextWithLabel
+                        className="w-full"
+                        onChange={(e) => {
+                            setNguonThamKhao(e.target.value);
+                        }}
+                        placeHolder="Nhập nguồn tham khảo"
+                        name="nguonThamKhao"
+                        value={nguonThamKhao}
+                    >
+                        Trích dẫn nguồn tham khảo
+                    </TextWithLabel>
+                    <button
+                        onClick={(e) => {
+                            if (!listNguonThamKhao.includes(nguonThamKhao)) {
+                                setListNguonThamKhao((prev) => [...prev, nguonThamKhao]);
+                            }
+                        }}
+                        className="bg-buttonColor self-end flex items-center justify-center rounded-true aspect-square cursor-pointer hover:shadow-xs h-10"
+                    >
+                        <HiPlus size={24} />
+                    </button>
+                </div>
+                <Table className="w-full">
+                    <TableHead>
+                        <TableRow>
+                            <TableHeadCell className="w-[15%]">ID</TableHeadCell>
+                            <TableHeadCell>Nguồn</TableHeadCell>
+                            <TableHeadCell className="whitespace-nowrap">Tuỳ chọn</TableHeadCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {listNguonThamKhao.map((row, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell className="text-left">{row}</TableCell>
+                                <TableCell className="text-center">
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <MyButton
+                                            onClick={() => {
+                                                setListNguonThamKhao(
+                                                    listNguonThamKhao.filter(
+                                                        (element) => !(element == row)
+                                                    )
+                                                );
+                                            }}
+                                            IconLeft={
+                                                <HiTrash size={24} className="text-redWarning" />
+                                            }
+                                        ></MyButton>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <DropDown
+                    size="medium"
+                    fieldName="Loại bài báo"
+                    options={types}
+                    select={type}
+                    setSelect={setType}
+                ></DropDown>
 
-                <label htmlFor="noidung">Nội dung báo cáo</label>
-                <textarea
-                    name="MOTA_PROJECT"
-                    value={inputs.MOTA_PROJECT || ""}
-                    onChange={handleChange}
-                    id="noidung"
-                    className="w-full border rounded-md h-100"
-                ></textarea>
-
+                {type &&
+                    (type === "Tạp chí khoa học" ? (
+                        <div>
+                            <div className="flex gap-10">
+                                <TextWithLabel
+                                    placeHolder="Tên của tạp chí"
+                                    className="w-150"
+                                    onChange={handleChange}
+                                    name="TEN_TAPCHI"
+                                    value={inputs.TEN_TAPCHI || ""}
+                                >
+                                    Tên tạp chí
+                                </TextWithLabel>
+                                <TextWithLabel
+                                    placeHolder="Đăng tại số, tập"
+                                    className="w-50"
+                                    onChange={handleChange}
+                                    name="SOTAP_TAPCHI"
+                                    value={inputs.SOTAP_TAPCHI || ""}
+                                >
+                                    Số đăng
+                                </TextWithLabel>
+                            </div>
+                        </div>
+                    ) : type === "Hội thảo khoa học" ? (
+                        <div>
+                            <div className="flex gap-10">
+                                <TextWithLabel
+                                    placeHolder="Tên của hội thảo"
+                                    className="w-150"
+                                    onChange={handleChange}
+                                    name="TEN_HOITHAO"
+                                    value={inputs.TEN_HOITHAO || ""}
+                                >
+                                    Tên hội thảo
+                                </TextWithLabel>
+                                <TextWithLabel
+                                    placeHolder="Địa điểm diễn ra hội thảo"
+                                    className="w-50"
+                                    onChange={handleChange}
+                                    name="DIADIEM_HOITHAO"
+                                    value={inputs.DIADIEM_HOITHAO || ""}
+                                >
+                                    Địa điểm hội thảo
+                                </TextWithLabel>
+                            </div>
+                        </div>
+                    ) : (
+                        ""
+                    ))}
                 <div className="flex w-full gap-2.5 justify-between flex-row-reverse  items-center">
                     <MyButton
                         onClick={handleSubmit}
@@ -300,22 +420,34 @@ export function EditProject() {
                     >
                         Xác nhận
                     </MyButton>
+                    <MyButton
+                        onClick={() => {
+                            setInputs({});
+                            setMembers([]);
+                            setType("");
+                            setGiangVien("");
+                        }}
+                        size="large"
+                        variant="underline"
+                        className="text-textColor2 border-textColor3"
+                    >
+                        Huỷ
+                    </MyButton>
                 </div>
             </div>
         </>
     );
 }
-export function NewProject() {
+export function NewPublication() {
     const [inputs, setInputs] = useState({});
-    const [ngayBD, setNgayBD] = useState(new Date());
-    const [ngayKT, setNgayKT] = useState(new Date());
+    const [type, setType] = useState(""); //loai cua bai bao
     const [members, setMembers] = useState([]);
-    const [cap, setCap] = useState("");
+    const [nguonThamKhao, setNguonThamKhao] = useState("");
+    const [listNguonThamKhao, setListNguonThamKhao] = useState([]);
     const token = getToken();
     const [giangVien, setGiangVien] = useState("");
-    const { DSGiangVien, DSCap } = useContext(ProjectContext);
+    const { DSGiangVien, types } = useContext(PublicationContext);
     const { showToast, ToastResponse } = useContext(AdminContext);
-    const giangVienKHMT = DSGiangVien;
     //test data
     function handleAddMember() {
         console.log("added", giangVien.input);
@@ -329,21 +461,30 @@ export function NewProject() {
     }
     async function handleSubmit() {
         const submitInput = { ...inputs };
-        submitInput["NGAYBD_PROJECT"] = formatDateLocal(ngayBD);
-        submitInput["NGAYKT_PROJECT"] = formatDateLocal(ngayKT);
         submitInput["THANHVIEN"] = members;
-        submitInput["CAP_PROJECT"] = cap;
-        submitInput["KINHPHI_PROJECT"] = currencyStringToNunber(inputs["KINHPHI_PROJECT"]);
+        submitInput["NGUONTHAMKHAO"] = listNguonThamKhao;
+        submitInput["LOAI_BAIBAO"] = type;
+        submitInput["NAM_BAIBAO"] = formatDisplayDateToSQLDate(submitInput["NAM_BAIBAO"]);
+        console.log(submitInput["NAM_BAIBAO"]);
         const REQUIRED_FIELDS = [
-            "ID_PROJECT",
-            "CAP_PROJECT",
-            "TEN_PROJECT",
-            "NGAYBD_PROJECT",
-            "NGAYKT_PROJECT",
-            "KINHPHI_PROJECT",
-            "MOTA_PROJECT",
+            "ID_BAIBAO",
+            "TEN_BAIBAO",
+            "LOAI_BAIBAO",
+            "NAM_BAIBAO",
+            "DOI_BAIBAO",
+            "KEYWORD_BAIBAO",
+            "TRICHDAN_BAIBAO",
+            "TOMTAT_BAIBAO",
         ];
-
+        if (type == "Tạp chí khoa học") {
+            REQUIRED_FIELDS.push("TEN_TAPCHI");
+            REQUIRED_FIELDS.push("SOTAP_TAPCHI");
+        } else if (type == "Hội thảo khoa học") {
+            REQUIRED_FIELDS.push("TEN_HOITHAO");
+            REQUIRED_FIELDS.push("DIADIEM_HOITHAO");
+        } else {
+            console.log("ARGHHHH");
+        }
         // Tìm các trường bị thiếu
         const missingField = REQUIRED_FIELDS.find((field) => {
             // Kiểm tra xem giá trị có trống rỗng, null, hoặc undefined không
@@ -362,7 +503,7 @@ export function NewProject() {
         }
         try {
             console.log(submitInput);
-            const res = await fetch("/api/admin/projects/", {
+            const res = await fetch("/api/admin/publications/", {
                 method: "post",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(submitInput),
@@ -382,12 +523,14 @@ export function NewProject() {
         }
         setInputs((prev) => ({ ...prev, [name]: value }));
     });
-
+    useEffect(() => {
+        console.log(listNguonThamKhao);
+    }, [listNguonThamKhao]);
     return (
         <>
             <div className="flex gap-2.5 justify-left items-center">
                 <MyButton className="bg-buttonColor aspect-square h-12">
-                    <Link to="/admin/projects">
+                    <Link to="/admin/publications">
                         <HiArrowLeft size={32}></HiArrowLeft>
                     </Link>
                 </MyButton>
@@ -396,66 +539,67 @@ export function NewProject() {
             <div className="relative bg-white p-5 shadow-md border-1 flex flex-col items-start gap-2.5 border-gray-200">
                 <TextWithLabel
                     onChange={handleChange}
-                    placeHolder="Nhập mã dự án"
-                    name="ID_PROJECT"
-                    value={inputs.ID_PROJECT || ""}
+                    placeHolder="Nhập mã bài báo"
+                    name="ID_BAIBAO"
+                    value={inputs.ID_BAIBAO || ""}
                 >
-                    Mã dự án
+                    Mã bài báo
                 </TextWithLabel>
                 <TextWithLabel
-                    placeHolder="Nhập tên dự án"
+                    placeHolder="Nhập tên bài báo"
                     className="w-full"
                     onChange={handleChange}
-                    name="TEN_PROJECT"
-                    value={inputs.TEN_PROJECT || ""}
+                    name="TEN_BAIBAO"
+                    value={inputs.TEN_BAIBAO || ""}
                 >
-                    Tên dự án
+                    Tên bài báo
                 </TextWithLabel>
-                <div className="flex gap-40 items-center">
-                    <div className="flex gap-2.5 items-end">
-                        <TextWithLabel
-                            onChange={handleChange}
-                            placeHolder="Nhập kinh phí dự án"
-                            name="KINHPHI_PROJECT"
-                            value={formatCurrency(inputs.KINHPHI_PROJECT) || ""}
-                        >
-                            Kinh phí của dự án
-                        </TextWithLabel>
-                        <span>VND</span>
-                    </div>
-                    <DropDown
-                        className="z-10"
-                        direction="vertical"
-                        select={cap}
-                        setSelect={setCap}
-                        size="medium"
-                        fieldName="Cấp dự án"
-                        options={DSCap}
-                    ></DropDown>
-                </div>
-                <div className="flex gap-5">
-                    <div>
-                        <label htmlFor="ngaybd">Ngày bắt đầu dự án</label>
-                        <Datepicker
-                            name="NGAYBD_PROJECT"
-                            value={ngayBD}
-                            onChange={(selectedDate) => setNgayBD(selectedDate)}
-                            id="ngaybd"
-                            language="vi-vn"
-                        ></Datepicker>
-                    </div>
-                    <div>
-                        <label htmlFor="ngaykt">Ngày hoàn thành dự án</label>
-                        <Datepicker
-                            name="NGAYKT_PROJECT"
-                            value={ngayKT}
-                            minDate={ngayBD}
-                            onChange={(selectedDate) => setNgayKT(selectedDate)}
-                            id="ngaykt"
-                            language="vi-vn"
-                        ></Datepicker>
-                    </div>
-                </div>
+                <TextWithLabel
+                    placeHolder="Nhập DOI của bài báo"
+                    className="w-full"
+                    onChange={handleChange}
+                    name="DOI_BAIBAO"
+                    value={inputs.DOI_BAIBAO || ""}
+                >
+                    DOI
+                </TextWithLabel>
+                <TextWithLabel
+                    placeHolder="Nhập trích dẫn của bài báo"
+                    className="w-full"
+                    onChange={handleChange}
+                    name="TRICHDAN_BAIBAO"
+                    value={inputs.TRICHDAN_BAIBAO || ""}
+                >
+                    Trích dẫn
+                </TextWithLabel>
+                <TextWithLabel
+                    type="text"
+                    placeHolder="Ngày công bố"
+                    className="w-50"
+                    onChange={handleChange}
+                    name="NAM_BAIBAO"
+                    value={inputs.NAM_BAIBAO || ""}
+                >
+                    Ngày công bố
+                </TextWithLabel>
+                <label htmlFor="keywords">Keywords</label>
+                <textarea
+                    placeholder="Những từ khoá của bài báo"
+                    name="KEYWORD_BAIBAO"
+                    value={inputs.KEYWORD_BAIBAO || ""}
+                    onChange={handleChange}
+                    id="keywords"
+                    className=" p-2 w-full border rounded-md h-20"
+                ></textarea>
+                <label htmlFor="tomtat">Tóm tắt</label>
+                <textarea
+                    placeholder="Tóm tắt của bài báo"
+                    name="TOMTAT_BAIBAO"
+                    value={inputs.TOMTAT_BAIBAO || ""}
+                    onChange={handleChange}
+                    id="tomtat"
+                    className="w-full p-2 border rounded-md h-100"
+                ></textarea>
                 <div className="flex gap-2.5">
                     <TextInput
                         size="large"
@@ -471,7 +615,8 @@ export function NewProject() {
                         <HiPlus size={24} />
                     </button>
                 </div>
-                <Table className="w-150">
+
+                <Table className="w-full">
                     <TableHead>
                         <TableRow>
                             <TableHeadCell>STT</TableHeadCell>
@@ -484,7 +629,7 @@ export function NewProject() {
                         {members
                             .map((member) => member.split(" - "))
                             .map((member, index) => (
-                                <TableRow>
+                                <TableRow key={index}>
                                     <TableCell className="text-center">{index + 1}</TableCell>
                                     <TableCell className="text-center">{member[1]}</TableCell>
                                     <TableCell className="text-center">{member[0]}</TableCell>
@@ -507,27 +652,116 @@ export function NewProject() {
                             ))}
                     </TableBody>
                 </Table>
-
-                <label htmlFor="noidung">Nội dung báo cáo</label>
-                <textarea
-                    name="MOTA_PROJECT"
-                    value={inputs.MOTA_PROJECT || ""}
-                    onChange={handleChange}
-                    id="noidung"
-                    className="w-full border rounded-md h-100"
-                ></textarea>
-
+                <div className="flex w-150 items-center gap-2.5">
+                    <TextWithLabel
+                        className="w-full"
+                        onChange={(e) => {
+                            setNguonThamKhao(e.target.value);
+                        }}
+                        placeHolder="Nhập nguồn tham khảo"
+                        name="nguonThamKhao"
+                        value={nguonThamKhao}
+                    >
+                        Trích dẫn nguồn tham khảo
+                    </TextWithLabel>
+                    <button
+                        onClick={(e) => {
+                            if (!listNguonThamKhao.includes(nguonThamKhao)) {
+                                setListNguonThamKhao((prev) => [...prev, nguonThamKhao]);
+                            }
+                        }}
+                        className="bg-buttonColor self-end flex items-center justify-center rounded-true aspect-square cursor-pointer hover:shadow-xs h-10"
+                    >
+                        <HiPlus size={24} />
+                    </button>
+                </div>
+                <Table className="w-full">
+                    <TableHead>
+                        <TableRow>
+                            <TableHeadCell className="w-[15%]">ID</TableHeadCell>
+                            <TableHeadCell>Nguồn</TableHeadCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {listNguonThamKhao.map((row, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell className="text-left">{row}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <DropDown
+                    size="medium"
+                    fieldName="Loại bài báo"
+                    options={types}
+                    select={type}
+                    setSelect={setType}
+                ></DropDown>
+                {type &&
+                    (type === "Tạp chí khoa học" ? (
+                        <div>
+                            <div className="flex gap-10">
+                                <TextWithLabel
+                                    placeHolder="Tên của tạp chí"
+                                    className="w-150"
+                                    onChange={handleChange}
+                                    name="TEN_TAPCHI"
+                                    value={inputs.TEN_TAPCHI || ""}
+                                >
+                                    Tên tạp chí
+                                </TextWithLabel>
+                                <TextWithLabel
+                                    placeHolder="Đăng tại số, tập"
+                                    className="w-50"
+                                    onChange={handleChange}
+                                    name="SOTAP_TAPCHI"
+                                    value={inputs.SOTAP_TAPCHI || ""}
+                                >
+                                    Số đăng
+                                </TextWithLabel>
+                            </div>
+                        </div>
+                    ) : type === "Hội thảo khoa học" ? (
+                        <div>
+                            <div className="flex gap-10">
+                                <TextWithLabel
+                                    placeHolder="Tên của hội thảo"
+                                    className="w-150"
+                                    onChange={handleChange}
+                                    name="TEN_HOITHAO"
+                                    value={inputs.TEN_HOITHAO || ""}
+                                >
+                                    Tên hội thảo
+                                </TextWithLabel>
+                                <TextWithLabel
+                                    placeHolder="Địa điểm diễn ra hội thảo"
+                                    className="w-50"
+                                    onChange={handleChange}
+                                    name="DIADIEM_HOITHAO"
+                                    value={inputs.DIADIEM_HOITHAO || ""}
+                                >
+                                    Địa điểm hội thảo
+                                </TextWithLabel>
+                            </div>
+                        </div>
+                    ) : (
+                        ""
+                    ))}
                 <div className="flex w-full gap-2.5 justify-between flex-row-reverse  items-center">
                     <MyButton
                         onClick={handleSubmit}
                         size="large"
                         className="bg-primaryColor text-white"
                     >
-                        Tạo
+                        Xác nhận
                     </MyButton>
                     <MyButton
                         onClick={() => {
-                            resetInput();
+                            setInputs({});
+                            setMembers([]);
+                            setType("");
+                            setGiangVien("");
                         }}
                         size="large"
                         variant="underline"
@@ -540,18 +774,17 @@ export function NewProject() {
         </>
     );
 }
-export function DanhSachProject() {
+export function DanhSachPublication() {
     const years = ["2020", "2021", "2022", "2023", "2024", "2025"];
-
     const token = getToken();
     const navigate = useNavigate();
     const [tableData, setTableData] = useState({ displayData: [], fetchData: [] });
-    const { DSProject } = useContext(ProjectContext);
-    const [capDuAn, setCapDuAn] = useState("");
+    const { FetchData } = useContext(PublicationContext);
+    const [publicationType, setPublicationType] = useState("");
+    const { showToast, ToastResponse } = useContext(AdminContext);
     const [namBD, setNamBD] = useState("");
     const [namKT, setNamKT] = useState("");
     const [giangVien, setGiangVien] = useState({});
-    const { showToast, ToastResponse } = useContext(AdminContext);
     const [searchValue, setSearchValue] = useState("");
     const [filterIsOpen, setFilterIsOpen] = useState(false);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
@@ -562,7 +795,7 @@ export function DanhSachProject() {
     const { data } = useContext(GlobalContext);
     async function handleDelete(id) {
         try {
-            const res = await fetch(`/api/admin/projects/${id}`, {
+            const res = await fetch(`/api/admin/publications/${id}`, {
                 method: "delete",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -574,10 +807,10 @@ export function DanhSachProject() {
     useEffect(() => {
         async function handleGet() {
             try {
-                const { res, json } = DSProject;
+                const { res, json } = FetchData;
                 if (res.ok) {
-                    setTableData({ fetchData: json, displayData: json });
-                    setSelectedRows(Object.fromEntries(json.map((row) => [row.ID_PROJECT, false])));
+                    setTableData({ displayData: json, fetchData: json });
+                    setSelectedRows(Object.fromEntries(json.map((row) => [row.ID_BAIBAO, false])));
                 }
             } catch (error) {
                 console.log(error.message);
@@ -594,36 +827,36 @@ export function DanhSachProject() {
     async function handleSearch() {
         setCurrentPage(0);
         const query = {
-            MACB: giangVien.MACB,
-            CAP_PROJECT: capDuAn,
+            MACB: giangVien.MACB || null,
+            LOAI_BAIBAO: publicationType || null,
             NAM_BD: namBD,
             NAM_KT: namKT,
-            Search: searchValue,
+            Search: searchValue || null,
         };
-        const { res, json } = await queryProjects(query);
+        const { res, json } = await queryPublications(query);
         setTableData((prev) => ({ ...prev, displayData: json }));
     }
     async function handleFilters() {
         setCurrentPage(0);
         const query = {
-            MACB: giangVien.MACB,
-            CAP_PROJECT: capDuAn,
+            MACB: giangVien.MACB || null,
+            LOAI_BAIBAO: publicationType || null,
             NAM_BD: namBD,
             NAM_KT: namKT,
-            Search: searchValue,
+            Search: searchValue || null,
         };
-        const { res, json } = await queryProjects(query);
+        const { res, json } = await queryPublications(query);
         setTableData((prev) => ({ ...prev, displayData: json }));
         setFilterIsOpen(false);
     }
     function clearFilters() {
         setCurrentPage(0);
-        setCapDuAn("");
+        setPublicationType("");
         setGiangVien({});
         setSearchValue("");
         setNamBD("");
         setNamKT("");
-        setTableData({ fetchData: tableData.fetchData, displayData: tableData.fetchData });
+        setTableData((prev) => ({ ...prev, displayData: tableData.fetchData }));
         setFilterIsOpen(false);
     }
     function handleSelectAll(e) {
@@ -674,7 +907,7 @@ export function DanhSachProject() {
                     </div>
                 </ModalFooter>
             </Modal>
-            <h1 className="text-h2 font-semibold my-2.5">Danh sách dự án</h1>
+            <h1 className="text-h2 font-semibold my-2.5">Danh sách bài báo</h1>
             <div className="relative bg-white p-5 rounded-lg">
                 <div className="TableControl grid grid-cols-8 gap-5">
                     <div className="col-span-3 flex justify-center items-center">
@@ -731,11 +964,11 @@ export function DanhSachProject() {
                                 align="start"
                                 direction="vertical"
                                 size="medium"
-                                select={capDuAn}
-                                setSelect={setCapDuAn}
-                                fieldName="Cấp dự án"
+                                select={publicationType}
+                                setSelect={setPublicationType}
+                                fieldName="Loại bài báo"
                                 open={false}
-                                options={data.levels}
+                                options={data.types}
                             ></DropDown>
                             <DropDown
                                 align="start"
@@ -759,13 +992,14 @@ export function DanhSachProject() {
                             ></DropDown>
                             <TextInput
                                 direction="col"
-                                fieldName={"Báo cáo viên"}
+                                fieldName={"Thành viên tham gia"}
                                 users={data.giangVien}
                                 giangVien={giangVien}
                                 setGiangVien={setGiangVien}
                             ></TextInput>
                         </div>
                         <div className="flex gap-2.5">
+                            {" "}
                             <MyButton
                                 onClick={handleFilters}
                                 size={"small"}
@@ -809,11 +1043,14 @@ export function DanhSachProject() {
                                     onChange={handleSelectAll}
                                 ></CheckBox>
                             </TableHeadCell>
-                            <TableHeadCell className="w-[15%]">Mã dự án</TableHeadCell>
-                            <TableHeadCell className="text-left">Tên dự án</TableHeadCell>
-                            <TableHeadCell className="w-[20%] text-center">Cấp dự án</TableHeadCell>
-                            <TableHeadCell className="w-[10%] text-center">Bắt đầu</TableHeadCell>
-                            <TableHeadCell className="w-[10%] text-center">Kết thúc</TableHeadCell>
+                            <TableHeadCell className="w-[15%]">Mã bài báo</TableHeadCell>
+                            <TableHeadCell className="text-left">Tên bài báo</TableHeadCell>
+                            <TableHeadCell className="w-[20%] text-center">
+                                Loại bài báo
+                            </TableHeadCell>
+                            <TableHeadCell className="w-[20%] text-center">
+                                Ngày công bố
+                            </TableHeadCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -829,42 +1066,26 @@ export function DanhSachProject() {
                                     rowPerPage * currentPage,
                                     rowPerPage * currentPage + rowPerPage
                                 )
-                                .map(
-                                    ({
-                                        ID_PROJECT,
-                                        TEN_PROJECT,
-                                        CAP_PROJECT,
-                                        NGAYBD_PROJECT,
-                                        NGAYKT_PROJECT,
-                                    }) => (
-                                        <TableRow key={ID_PROJECT}>
-                                            <TableCell>
-                                                <CheckBox
-                                                    onChange={() => {
-                                                        handleSelectRows(ID_PROJECT);
-                                                    }}
-                                                    checked={selectedRows[ID_PROJECT]}
-                                                ></CheckBox>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                {ID_PROJECT}
-                                            </TableCell>
-                                            <TableCell className="hover:underline hover:cursor-pointer">
-                                                <Link to={`edit/${ID_PROJECT}`}>{TEN_PROJECT}</Link>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                {CAP_PROJECT}
-                                            </TableCell>
-
-                                            <TableCell className="text-center">
-                                                {formatToDisplayDate(new Date(NGAYBD_PROJECT))}
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                {formatToDisplayDate(new Date(NGAYKT_PROJECT))}
-                                            </TableCell>
-                                        </TableRow>
-                                    )
-                                )
+                                .map(({ ID_BAIBAO, TEN_BAIBAO, LOAI_BAIBAO, NAM_BAIBAO }) => (
+                                    <TableRow key={ID_BAIBAO}>
+                                        <TableCell>
+                                            <CheckBox
+                                                onChange={() => {
+                                                    handleSelectRows(ID_BAIBAO);
+                                                }}
+                                                checked={selectedRows[ID_BAIBAO]}
+                                            ></CheckBox>
+                                        </TableCell>
+                                        <TableCell className="text-center">{ID_BAIBAO}</TableCell>
+                                        <TableCell className="hover:underline hover:cursor-pointer">
+                                            <Link to={`edit/${ID_BAIBAO}`}>{TEN_BAIBAO}</Link>
+                                        </TableCell>
+                                        <TableCell className="text-center">{LOAI_BAIBAO}</TableCell>
+                                        <TableCell className="text-center">
+                                            {formatToDisplayDate(new Date(NAM_BAIBAO))}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
                         )}
                     </TableBody>
                 </Table>
@@ -879,11 +1100,11 @@ export function DanhSachProject() {
         </>
     );
 }
-export function AdminProject() {
+export function AdminPublication() {
     const [loading, setLoading] = useState(true);
-    const [DSCap, setDSCap] = useState([]);
     const [DSGiangVien, setDSGiangVien] = useState([]);
-    const [DSProject, setDSProject] = useState([]);
+    const [types, setTypes] = useState([]);
+    const [FetchData, setFetchData] = useState([]);
     const {
         ToastMessage,
         ToastSuccess,
@@ -896,17 +1117,15 @@ export function AdminProject() {
     useEffect(() => {
         async function getData() {
             try {
-                const [capData, userData, projects] = await Promise.all([
-                    getCap(),
+                const [userData, publications, publicationType] = await Promise.all([
                     getUsers(),
-                    getProjects(),
+                    getPublications(),
+                    getType(),
                 ]);
-                const { DSCap } = capData;
                 const { DSUser } = userData;
-
-                setDSCap(DSCap.map((row) => row.TEN_CAP));
+                setTypes(publicationType.json.map((row) => row.TEN_LOAI));
                 setDSGiangVien(GiangVienFromUsers(DSUser));
-                setDSProject(projects);
+                setFetchData(publications);
             } finally {
                 setLoading(false);
             }
@@ -915,9 +1134,8 @@ export function AdminProject() {
     }, []);
 
     if (loading) return <div>Đang tải dữ liệu...</div>;
-
     return (
-        <ProjectContext.Provider value={{ DSProject, DSCap, DSGiangVien }}>
+        <PublicationContext.Provider value={{ FetchData, DSGiangVien, types }}>
             <Outlet />
             <Toast
                 ToastDisplay={ToastDisplay}
@@ -925,6 +1143,6 @@ export function AdminProject() {
                 ToastSuccess={ToastSuccess}
                 SetToastDisplay={setToastDisplay}
             ></Toast>
-        </ProjectContext.Provider>
+        </PublicationContext.Provider>
     );
 }

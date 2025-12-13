@@ -3,7 +3,7 @@ import { HiPlus, HiDownload } from "react-icons/hi";
 import { useContext, useEffect, useState } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal";
 import { TextWithLabel } from "../components/Form";
-import { getCap } from "../services/Services";
+import { getCap, getType } from "../services/Services";
 import { getToken } from "../util/util";
 
 import Toast from "../components/Toast";
@@ -18,13 +18,13 @@ import {
 } from "../components/Table";
 import { AdminContext } from "../context/Context";
 import { useNavigate } from "react-router-dom";
-function DanhSachCap() {
+function DanhSachLoai() {
     const token = getToken();
     const navigate = useNavigate();
     const target = "";
     const { ToastMessage, ToastSuccess, ToastDisplay, setToastDisplay, ToastResponse } =
         useContext(AdminContext);
-    const initialInput = { MA_CAP: "", TEN_CAP: "", MO_TA_CAP: "" };
+    const initialInput = { ID_LOAI: "", TEN_LOAI: "", MOTA_LOAI: "" };
     const [data, setData] = useState([]);
     const [confirmModal, setDisplayConfirmModal] = useState(false);
     const [editModal, setEditModal] = useState(target); //edit target
@@ -58,11 +58,13 @@ function DanhSachCap() {
 
     //CRUD
     async function handleGet() {
+        console.log("called");
         try {
-            const { capRes, DSCap } = await getCap();
-            if (capRes.ok) {
-                setData(DSCap);
-                setSelectedRows(Object.fromEntries(DSCap.map((row) => [row.MA_CAP, false])));
+            const { res, json } = await getType();
+            if (res.ok) {
+                setData(json);
+                console.log(json);
+                setSelectedRows(Object.fromEntries(json.map((row) => [row.ID_LOAI, false])));
             }
         } catch (error) {
             console.log(error.message);
@@ -73,7 +75,7 @@ function DanhSachCap() {
     }
     async function handleCreate() {
         try {
-            const res = await fetch("/api/admin/danhmuc/cap/", {
+            const res = await fetch("/api/admin/danhmuc/type/", {
                 method: "post",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(inputs),
@@ -86,13 +88,13 @@ function DanhSachCap() {
         }
     }
     async function handleEdit() {
-        const MA_CAP = editModal;
-        const { TEN_CAP, MO_TA_CAP } = inputs;
+        const ID_LOAI = editModal;
+        const { TEN_LOAI, MOTA_LOAI } = inputs;
         try {
-            const res = fetch(`/api/admin/danhmuc/cap/${MA_CAP}`, {
+            const res = fetch(`/api/admin/danhmuc/type/${ID_LOAI}`, {
                 method: "put",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ TEN_CAP, MO_TA_CAP }),
+                body: JSON.stringify({ TEN_LOAI, MOTA_LOAI }),
             });
             ToastResponse(res); //thong bao cho nguoi dung
             handleGet();
@@ -104,7 +106,7 @@ function DanhSachCap() {
     }
     async function handleDelete(target) {
         try {
-            const res = await fetch(`/api/admin/danhmuc/cap/${target}`, {
+            const res = await fetch(`/api/admin/danhmuc/type/${target}`, {
                 method: "delete",
             });
             ToastResponse(res); //thong bao cho nguoi dung
@@ -120,17 +122,17 @@ function DanhSachCap() {
                 <ModalBody>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.MA_CAP}
-                        name="MA_CAP"
-                        id="MA_CAP"
+                        value={inputs.ID_LOAI}
+                        name="ID_LOAI"
+                        id="ID_LOAI"
                     >
                         Mã cấp
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.TEN_CAP}
-                        name="TEN_CAP"
-                        id="TEN_CAP"
+                        value={inputs.TEN_LOAI}
+                        name="TEN_LOAI"
+                        id="TEN_LOAI"
                     >
                         Tên cấp
                     </TextWithLabel>
@@ -139,9 +141,9 @@ function DanhSachCap() {
                     </label>
                     <textarea
                         onChange={handleChange}
-                        value={inputs.MO_TA_CAP}
-                        name="MO_TA_CAP"
-                        id="MO_TA_CAP"
+                        value={inputs.MOTA_LOAI}
+                        name="MOTA_LOAI"
+                        id="MOTA_LOAI"
                         className="p-2 w-[100%] h-20 border-secondaryColor border-2 transition-all ease-in-out duration-300 focus:border-primaryColor outline-0"
                     ></textarea>
                 </ModalBody>
@@ -171,17 +173,17 @@ function DanhSachCap() {
                     <TextWithLabel
                         disabled={true}
                         onChange={handleChange}
-                        value={inputs.MA_CAP}
-                        name="MA_CAP"
-                        id="MA_CAP"
+                        value={inputs.ID_LOAI}
+                        name="ID_LOAI"
+                        id="ID_LOAI"
                     >
                         Mã cấp
                     </TextWithLabel>
                     <TextWithLabel
                         onChange={handleChange}
-                        value={inputs.TEN_CAP}
-                        name="TEN_CAP"
-                        id="TEN_CAP"
+                        value={inputs.TEN_LOAI}
+                        name="TEN_LOAI"
+                        id="TEN_LOAI"
                     >
                         Tên cấp
                     </TextWithLabel>
@@ -190,9 +192,9 @@ function DanhSachCap() {
                     </label>
                     <textarea
                         onChange={handleChange}
-                        value={inputs.MO_TA_CAP}
-                        name="MO_TA_CAP"
-                        id="MO_TA_CAP"
+                        value={inputs.MOTA_LOAI}
+                        name="MOTA_LOAI"
+                        id="MOTA_LOAI"
                         className="p-2 w-[100%] h-20 border-secondaryColor border-2 transition-all ease-in-out duration-300 focus:border-primaryColor outline-0"
                     ></textarea>
                 </ModalBody>
@@ -246,7 +248,7 @@ function DanhSachCap() {
                     </div>
                 </ModalFooter>
             </Modal>
-            <h1 className="text-h2 font-semibold my-2.5">Danh sách cấp nghiên cứu</h1>
+            <h1 className="text-h2 font-semibold my-2.5">Danh sách loại bài báo</h1>
             <div className="relative bg-white p-5 rounded-lg">
                 <div className="TableControl grid grid-cols-8 gap-5">
                     <div
@@ -293,33 +295,33 @@ function DanhSachCap() {
                                     onChange={handleSelectAll}
                                 ></CheckBox>
                             </TableHeadCell>
-                            <TableHeadCell className="w-[15%]">Mã cấp</TableHeadCell>
-                            <TableHeadCell className="text-left">Tên cấp</TableHeadCell>
+                            <TableHeadCell className="w-[15%]">Mã loại bài báo</TableHeadCell>
+                            <TableHeadCell className="text-left">Tên loại bài báo</TableHeadCell>
                             <TableHeadCell className="text-center">Mô tả</TableHeadCell>
                         </TableRow>
                     </TableHead>
                     <TableBody className="text-h6">
                         {data.map((row) => (
-                            <TableRow key={row.MA_CAP}>
+                            <TableRow key={row.ID_LOAI}>
                                 <TableCell>
                                     <CheckBox
                                         onChange={() => {
-                                            handleSelectRows(row.MA_CAP);
+                                            handleSelectRows(row.ID_LOAI);
                                         }}
-                                        checked={selectedRows[row.MA_CAP]}
+                                        checked={selectedRows[row.ID_LOAI]}
                                     ></CheckBox>
                                 </TableCell>
-                                <TableCell className="text-center">{row.MA_CAP}</TableCell>
+                                <TableCell className="text-center">{row.ID_LOAI}</TableCell>
                                 <TableCell
                                     onClick={() => {
-                                        setEditModal(row.MA_CAP);
+                                        setEditModal(row.ID_LOAI);
                                         setInputs(row);
                                     }}
                                     className="hover:underline hover:cursor-pointer"
                                 >
-                                    {row.TEN_CAP}
+                                    {row.TEN_LOAI}
                                 </TableCell>
-                                <TableCell className="text-center">{row.MO_TA_CAP}</TableCell>
+                                <TableCell className="text-center">{row.MOTA_LOAI}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -334,10 +336,10 @@ function DanhSachCap() {
         </>
     );
 }
-export default function AdminDanhMucCap() {
+export default function AdminDanhMucLoaiBaiBao() {
     return (
         <div className="wrapper">
-            <DanhSachCap></DanhSachCap>
+            <DanhSachLoai></DanhSachLoai>
         </div>
     );
 }

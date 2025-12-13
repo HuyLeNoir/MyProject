@@ -1,323 +1,318 @@
 import "../App.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext, Fragment } from "react";
 import Pagination from "../components/Pagination.jsx";
 import DropDown from "../components/Dropdown.jsx";
 import InputGiangVien from "../components/InputGiangVien.jsx";
-import Table from "../components/AccordionTable.jsx";
-import Search from "../components/Search.jsx";
-import NavigationBar from "../components/removed/NavBar.jsx";
+import Search from "../components/newSearch.jsx";
+import { formatCurrency, formatToDisplayDate } from "../util/util.js";
 import MyButton from "../components/MyButton.jsx";
-import Header from "../components/header.jsx";
+import {
+    Table,
+    TableBody,
+    TableHead,
+    TableCell,
+    TableRow,
+    TableHeadCell,
+} from "../components/Table.jsx";
 import Footer from "../components/Footer.jsx";
+import { HiChevronDown } from "react-icons/hi";
+import { GlobalContext } from "../context/Context.jsx";
+import { getDeTai, queryResearchs } from "../services/Services_Public.js";
+import { exportDeTaiToExcel } from "../util/exportExcel.js";
 
 //TODO: normalize table for reuseable purpose
 
-function Main({ children }) {
-    return <div className="Wrapper p-4">{children}</div>;
-}
-
-function TableDeTai() {
-    //fetch data lien quan tu csdl
-    const DATA = [
-        {
-            maDeTai: "1",
-            tenDeTai:
-                "TARGET, tuyển chọn vi khuẩn nội sinh ở cây dược liệu, ứng dụng hỗ trợ điều trị các bệnh lý liên quan hội chứng chuyển hóa",
-            capDeTai: "Đề tài cấp Sinh viên",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Lê Phan Nhật Huy",
-            linhVuc: "Khoa Học Máy Tính",
-            tomTat: "Nghiên testString Kiểm thử Thuật toán cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Võ Trí Thức",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "2",
-            tenDeTai:
-                "Tối ưu hóa mạng giám sát rầy nâu dựa trên các bẫy đèn tự động tại khu vực Đồng bằng sông Cửu Long",
-            capDeTai: "Đề tài cấp Bộ",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Huỳnh Xuân Hiệp",
-            linhVuc: "Y tế",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Mã Trường Thành",
-            members: ["Lê Phan Nhật Huy", "Huỳnh Xuân Hiệp", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "3",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Giáo dục",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Mã Trường Thành",
-            members: ["Lê Phan Nhật Huy", "Trần Cao Đệ", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "4",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Nông nghiệp",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Trần Nguyễn Minh Thư",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "5",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Nông nghiệp",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Trần Nguyễn Minh Thư",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "6",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Công nghiệp",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Mã Trường Thành",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "7",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Kinh tế",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Võ Trí Thức",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "8",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Nông nghiệp",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Võ Trí Thức",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "9",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Giáo dục",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Mã Trường Thành",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "10",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Skibidi",
-            tomTat: "Nghiên cứu này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Mã Trường Thành",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-        {
-            maDeTai: "11",
-            tenDeTai:
-                "Xây dựng mô hình ứng dụng công nghệ thông tin phục vụ phát triển nông nghiệp và công nghiệp nông thôn",
-            capDeTai: "Đề tài cấp Địa phương",
-            ngayThucHien: "13/07/2025",
-            chuNhiem: "Trần Cao Đệ",
-            linhVuc: "Skibidi",
-            tomTat: "NC này được thực hiện nhằm thiết kế mô hình xe điện điều khiển từ xa tích hợp năng lượng mặt trời. Việc sử dụng Arduino để điều khiển và bánh xe Mecanum cho chuyển động đa hướng, xe tích hợp các tấm pin mặt trời để nâng cao hiệu suất và kéo dài thời lượng pin. Các thử nghiệm được tiến hành dưới nhiều điều kiện khác nhau, đánh giá hiệu suất hoạt động và đề xuất các cải tiến. Kết quả cho thấy hiệu quả năng lượng khả quan. Cụ thể xe có thể duy trì hoạt động trong khoảng thời gian từ 3 đến 4 giờ trong điều kiện thời tiết tốt, tuy nhiên hạn chế ở khả năng hoạt động khi ánh sáng yếu, xe có thể  duy trì hoạt động trong vòng 2 giờ đồng hồ bằng việc sử dụng bộ pin lưu trữ. Kết quả thực nghiệm cho thấy trong phạm vi điều khiển 15 m xe duy trì kết nối được ổn định, không bị nhiễu sóng. Bên cạnh đó, xe có thể chịu tải trọng lên đến 3 kg. Kết quả nghiên cứu này đóng góp vào giải pháp giao thông bền vững bằng cách tích hợp năng lượng mặt trời với xe điện quy mô nhỏ, nổi bật tiềm năng và thách thức cho phát triển trong tương lai.",
-            GVHD: "Trần Nguyễn Minh Thư",
-            members: ["Lê Phan Nhật Huy", "LN Huy", "Huy Dolphin"],
-        },
-    ];
-    const Theads = [
-        { size: "w-[40%]", fieldName: "Tên đề tài" },
-        { size: "", fieldName: "Cấp đề tài" },
-        { size: "", fieldName: "Ngày thực hiện" },
-        { size: "", fieldName: "Chủ nhiệm" },
-        { size: "", fieldName: "Lĩnh vực" },
-    ];
-    const fields = ["maDeTai", "tenDeTai", "capDeTai", "ngayThucHien", "chuNhiem", "linhVuc"];
-    const danhSachGiangVienHD = [
-        { Name: "Mã Trường Thành", MSCB: "MSCB01" },
-        { Name: "Trần Nguyễn Minh Thư", MSCB: "MSCB02" },
-        { Name: "Võ Trí Thức", MSCB: "MSCB03" },
-    ];
-    const danhSachLinhVuc = [
-        "Y tế",
-        "Giáo dục",
-        "Giao thông",
-        "Kinh tế",
-        "Nông nghiệp",
-        "Công nghiệp",
-    ]; // 1 data được lọc trong bảng
-    const danhSachCapDeTai = ["Sinh viên", "Địa phương", "Trường", "Bộ", "Nhà nước"];
+function DeTai() {
     const years = ["2020", "2021", "2022", "2023", "2024", "2025"];
-    //cac state
-    const [tableData, setTableData] = useState(DATA);
+    const [tableData, setTableData] = useState({ fetchData: [], displayData: [] });
+    //filter
     const [linhVuc, setLinhVuc] = useState("");
     const [searchValue, setSearchValue] = useState("");
     const [capDeTai, setCapDeTai] = useState("");
     const [namBD, setNamBD] = useState("");
     const [namKT, setNamKT] = useState("");
-    const [giangVienHD, setGiangVienHD] = useState({ Name: "", MSCB: "" });
+    const [opens, setOpens] = useState([]);
+    const [giangVienHD, setGiangVienHD] = useState({});
     const [currentPage, setCurrentPage] = useState(0);
     //cac bien dung trong danh so trang
     const [NofRowPerPage, setNofRowPerPage] = useState(10); //so row hien thi trong 1 table default: 10
-    const totalRows = DATA.length;
-    const currentRows = tableData.length;
-    const NoOfPage = Math.ceil(currentRows / NofRowPerPage);
-    // useEffect(() => {
-    //     console.log(Number(NofRowPerPage));
-    // }, [NofRowPerPage]); //test so trang
-    // useEffect(() => {
-    //     alert("Ban dang o page: " + currentPage);
-    // }, [currentPage]); //test page
-
-    // useEffect(()=> {
-    //     console.log(capDeTai);
-    //     console.log(LinhVuc);
-    //     console.log(GiangVienHD_Selected); //test cac du lieu trong bang filter
-    // }, [GiangVienHD_Selected], [LinhVuc], [capDeTai])
-    function handleFilters() {
-        let data = DATA.filter(
-            (item) =>
-                (giangVienHD.Name === "" ||
-                    item.GVHD.toLowerCase() === giangVienHD.Name.toLowerCase()) &&
-                (linhVuc === "" || item.linhVuc === linhVuc) &&
-                (searchValue.trim() === "" ||
-                    item.tomTat.toLowerCase().includes(searchValue.trim()) ||
-                    item.members.toString().toLowerCase().includes(searchValue.trim())) &&
-                (capDeTai === "" || item.capDeTai === "Đề tài cấp " + capDeTai) &&
-                (namBD === "" || Number(item.ngayThucHien.split("/")[2]) >= Number(namBD)) &&
-                (namKT === "" || Number(item.ngayThucHien.split("/")[2]) <= Number(namKT))
-        );
-        setTableData(data);
+    const totalRows = tableData.displayData.length;
+    const NoOfPage = Math.ceil(totalRows / NofRowPerPage);
+    const { data } = useContext(GlobalContext);
+    useEffect(() => {
+        (async () => {
+            const { res, json } = await getDeTai();
+            setTableData((prev) => ({ fetchData: json, displayData: json }));
+            setOpens(
+                json.reduce((acc, element) => {
+                    acc[element.ID_DETAI] = false;
+                    return acc;
+                }, {})
+            );
+        })();
+    }, []);
+    async function handleFilters() {
+        const query = {
+            MACB: giangVienHD.MACB || null,
+            TEN_LINH_VUC: linhVuc || null,
+            TEN_CAP: capDeTai || null,
+            NAM_BD: namBD,
+            NAM_KT: namKT,
+            Search: searchValue || null,
+        };
+        const { res, json } = await queryResearchs(query);
+        setTableData((prev) => ({ ...prev, displayData: json }));
     }
     function clearFilters() {
         setCapDeTai("");
         setLinhVuc("");
-        setGiangVienHD({ Name: "", MSCB: "" });
+        setGiangVienHD({});
         setSearchValue("");
         setNamBD("");
         setNamKT("");
-        setTableData(DATA);
+        setTableData((prev) => ({ ...prev, displayData: tableData.fetchData }));
+    }
+    function handleExport() {
+        exportDeTaiToExcel(tableData.fetchData, "Danh_sach_de_tai.xlsx");
+    }
+    if (!tableData) {
+        return <div>loading...</div>;
     }
     return (
-        <>
-            <div className="flex flex-col gap-2.5">
-                <MyButton
-                    size="small"
-                    variant="none"
-                    className="self-end bg-buttonColor text-textColor1"
-                >
-                    Xuất danh sách
-                </MyButton>
-                <div className="flex gap-2.5 tableNavigation">
-                    <DropDown
-                        selected={linhVuc}
-                        setSelected={setLinhVuc}
-                        fieldName="Lĩnh vực"
-                        open={false}
-                        size="medium"
-                        options={danhSachLinhVuc}
-                    ></DropDown>
-                    <DropDown
-                        size="medium"
-                        selected={capDeTai}
-                        setSelected={setCapDeTai}
-                        fieldName="Cấp đề tài"
-                        open={false}
-                        options={danhSachCapDeTai}
-                    ></DropDown>
-                    <DropDown
-                        size="auto"
-                        selected={namBD}
-                        setSelected={setNamBD}
-                        fieldName="Từ năm"
-                        open={false}
-                        options={years}
-                    ></DropDown>
-                    <DropDown
-                        size="auto"
-                        selected={namKT}
-                        setSelected={setNamKT}
-                        fieldName="Đến năm"
-                        open={false}
-                        options={years}
-                    ></DropDown>
-                    <InputGiangVien
-                        fieldName={"Giảng Viên Hướng Dẫn"}
-                        users={danhSachGiangVienHD}
-                        giangVien={giangVienHD}
-                        setGiangVien={setGiangVienHD}
-                    ></InputGiangVien>
-                    <Search searchValue={searchValue} setSearchValue={setSearchValue}></Search>
-                </div>
-                <div className="flex gap-2.5">
+        <div className="font-display bg-white">
+            <div className="Wrapper p-4">
+                <div className="flex flex-col gap-2.5">
                     <MyButton
-                        onClick={handleFilters}
+                        onClick={handleExport}
                         size="small"
                         variant="none"
-                        className="bg-successColor text-textColor1"
+                        className="self-end bg-buttonColor text-textColor1"
                     >
-                        Xác Nhận
+                        Xuất danh sách
                     </MyButton>
-                    <MyButton
-                        onClick={clearFilters}
-                        size="small"
-                        variant="none"
-                        className="bg-warningColor text-textColor1"
-                    >
-                        Huỷ
-                    </MyButton>
+                    <div className="flex gap-2.5 tableNavigation">
+                        <DropDown
+                            align="start"
+                            direction="vertical"
+                            select={linhVuc}
+                            setSelect={setLinhVuc}
+                            fieldName="Lĩnh vực"
+                            open={false}
+                            size="medium"
+                            options={data.fields}
+                        ></DropDown>
+                        <DropDown
+                            align="start"
+                            direction="vertical"
+                            size="medium"
+                            select={capDeTai}
+                            setSelect={setCapDeTai}
+                            fieldName="Cấp đề tài"
+                            open={false}
+                            options={data.levels}
+                        ></DropDown>
+                        <DropDown
+                            align="start"
+                            direction="vertical"
+                            size="auto"
+                            select={namBD}
+                            setSelect={setNamBD}
+                            fieldName="Từ năm"
+                            open={false}
+                            options={years}
+                        ></DropDown>
+                        <DropDown
+                            align="start"
+                            direction="vertical"
+                            size="auto"
+                            select={namKT}
+                            setSelect={setNamKT}
+                            fieldName="Đến năm"
+                            open={false}
+                            options={years}
+                        ></DropDown>
+                        <InputGiangVien
+                            direction="col"
+                            fieldName={"Giảng Viên Hướng Dẫn"}
+                            users={data.giangVien}
+                            giangVien={giangVienHD}
+                            setGiangVien={setGiangVienHD}
+                        ></InputGiangVien>
+                        <Search self="end" value={searchValue} setValue={setSearchValue}></Search>
+                    </div>
+                    <div className="flex gap-2.5">
+                        <MyButton
+                            onClick={handleFilters}
+                            size="small"
+                            variant="none"
+                            className="bg-successColor text-textColor1"
+                        >
+                            Xác Nhận
+                        </MyButton>
+                        <MyButton
+                            onClick={clearFilters}
+                            size="small"
+                            variant="none"
+                            className="bg-warningColor text-textColor1"
+                        >
+                            Huỷ
+                        </MyButton>
+                    </div>
                 </div>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeadCell className="w-[50%]">Tên đề tài</TableHeadCell>
+                            <TableHeadCell className="text-center">Cấp đề tài</TableHeadCell>
+                            <TableHeadCell className="text-center">Lĩnh vực</TableHeadCell>
+                            <TableHeadCell className="text-center">Chủ nhiệm</TableHeadCell>
+                            <TableHeadCell className="text-center">Ngày thực hiện</TableHeadCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {tableData.displayData.length < 1 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center">
+                                    No result
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            tableData.displayData
+                                .slice(
+                                    currentPage * NofRowPerPage,
+                                    currentPage * NofRowPerPage + NofRowPerPage
+                                )
+                                .map((row) => (
+                                    <Fragment key={row.ID_DETAI}>
+                                        <TableRow
+                                            className="cursor-pointer hover:bg-gray-50 transition-all duration-300 ease-in-out"
+                                            onClick={() => {
+                                                setOpens((prev) => ({
+                                                    ...prev,
+                                                    [row.ID_DETAI]: !opens[row.ID_DETAI],
+                                                }));
+                                            }}
+                                        >
+                                            <TableCell>
+                                                <span className="flex gap-2.5 items-center">
+                                                    <HiChevronDown
+                                                        size={24}
+                                                        className={`flex-shrink-0 inline-block leading-none align-middle transition-all text-textColor2 duration-500 ease-in-out ${
+                                                            opens[row.ID_DETAI] && "rotate-180"
+                                                        }`}
+                                                    ></HiChevronDown>
+                                                    {row.TEN_DETAI}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {row.TEN_CAP}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {row.TEN_LINH_VUC}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {
+                                                    row.THANHVIEN.split(",")
+                                                        .filter(
+                                                            (element) =>
+                                                                element.split("-")[2] == "Chủ nhiệm"
+                                                        )[0]
+                                                        .split("-")[1]
+                                                }
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {formatToDisplayDate(new Date(row.NGAYBD)) +
+                                                    " - " +
+                                                    formatToDisplayDate(new Date(row.NGAYKT))}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={5}>
+                                                <div
+                                                    className={`${
+                                                        opens[row.ID_DETAI]
+                                                            ? "max-h-160"
+                                                            : "max-h-0"
+                                                    } px-4 overflow-hidden flex gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
+                                                >
+                                                    <span className="flex gap-2.5">
+                                                        <span className=" text-primaryColor">
+                                                            Tóm tắt:
+                                                        </span>
+                                                        <span>{row.TOMTAT_NCKH}</span>
+                                                    </span>
+                                                    <span className="flex gap-2.5 text-primaryColor">
+                                                        <span>Giảng viên hướng dẫn:</span>
+                                                        <span className="text-textColor1">
+                                                            {row.GVHD.split("-")[1]}
+                                                        </span>
+                                                    </span>
+                                                    <div className="flex gap-10">
+                                                        <div className="flex gap-2.5">
+                                                            <span className="text-primaryColor">
+                                                                Kinh phí dự kiến
+                                                            </span>
+                                                            <span>
+                                                                {formatCurrency(row.KINHPHIDUKIEN)}{" "}
+                                                                VND
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex gap-2.5">
+                                                            <span className="text-primaryColor">
+                                                                Kinh phí thực tế
+                                                            </span>
+                                                            <span>
+                                                                {formatCurrency(row.KINHPHITHUCCHI)}{" "}
+                                                                VND
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className=" text-primaryColor">
+                                                            Các thành viên tham gia:
+                                                        </span>
+                                                        <ol className="list-decimal list-inside p-2 flex flex-col">
+                                                            {row.THANHVIEN.split(",").map(
+                                                                (member, index) => (
+                                                                    <li key={member + " " + index}>
+                                                                        {member.split("-")[1]}
+                                                                    </li>
+                                                                )
+                                                            )}
+                                                        </ol>
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className=" text-primaryColor">
+                                                            Các bài báo liên quan
+                                                        </span>
+                                                        <ol className="list-decimal list-inside p-2 flex flex-col">
+                                                            {row.THANHVIEN.split(",").map(
+                                                                (member, index) => (
+                                                                    <li key={member + " " + index}>
+                                                                        {member.split("-")[1]}
+                                                                    </li>
+                                                                )
+                                                            )}
+                                                        </ol>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    </Fragment>
+                                ))
+                        )}
+                    </TableBody>
+                </Table>
+                <Pagination
+                    align="start"
+                    direction="vertical"
+                    setCurrentPage={setCurrentPage}
+                    numberOfRows={totalRows}
+                    numberOfPage={NoOfPage}
+                    select={NofRowPerPage}
+                    setSelect={setNofRowPerPage}
+                ></Pagination>
             </div>
-            <Table
-                Theads={Theads}
-                fields={fields}
-                currentPage={currentPage}
-                renderAmount={Number(NofRowPerPage)}
-                data={tableData}
-            ></Table>
-            <Pagination
-                setCurrentPage={setCurrentPage}
-                numberOfRows={totalRows}
-                numberOfPage={NoOfPage}
-                selected={NofRowPerPage}
-                setSelected={setNofRowPerPage}
-            ></Pagination>
-        </>
-    );
-}
-function DeTai() {
-    return (
-        <div className="font-display bg-backgroundColor">
-            <Main>
-                <TableDeTai></TableDeTai>
-            </Main>
             <Footer></Footer>
         </div>
     );

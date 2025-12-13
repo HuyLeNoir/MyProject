@@ -1,6 +1,13 @@
 import MyButton from "../components/MyButton.jsx";
 import { Datepicker } from "flowbite-react";
-import { getCap, getLinhVuc, getUsers, getSeminarByID, getSeminars } from "../services/Services.js";
+import {
+    getCap,
+    getLinhVuc,
+    getUsers,
+    getSeminarByID,
+    getSeminars,
+    querySeminars,
+} from "../services/Services.js";
 import {
     formatDateLocal,
     SinhVienFromUsers,
@@ -14,7 +21,7 @@ import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } fro
 import { useEffect, useState, useContext, useCallback } from "react";
 import { Outlet, useParams, Link, useNavigate } from "react-router-dom";
 import { TextWithLabel, OnlyText } from "../components/Form.jsx";
-import { AdminContext, ChuyenDeContext } from "../context/Context.jsx";
+import { AdminContext, ChuyenDeContext, GlobalContext } from "../context/Context.jsx";
 import Toast from "../components/Toast.jsx";
 import {
     Table,
@@ -24,7 +31,7 @@ import {
     TableHead,
     TableBody,
     CheckBox,
-} from "../components/TableOverhaul.jsx";
+} from "../components/Table.jsx";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal.jsx";
 import DropDown from "../components/Dropdown.jsx";
 import TextInput from "../components/InputGiangVien.jsx";
@@ -58,10 +65,6 @@ export function EditChuyenDe() {
         }
         getData();
     }, []);
-    useEffect(() => {
-        console.log("date change");
-        console.log(date);
-    }, [date]);
     async function handleSubmit() {
         const submitInput = { ...inputs };
         submitInput["NGAYDIENRA_SEMINAR"] = formatDateLocal(date);
@@ -96,8 +99,8 @@ export function EditChuyenDe() {
         }
         try {
             console.log(submitInput);
-            const res = await fetch("/api/admin/seminars/", {
-                method: "post",
+            const res = await fetch(`/api/admin/seminars/${id}`, {
+                method: "put",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(submitInput),
             });
@@ -138,6 +141,7 @@ export function EditChuyenDe() {
             </div>
             <div className="relative bg-white p-5 shadow-md border-1 flex flex-col items-start gap-2.5 border-gray-200">
                 <TextWithLabel
+                    disabled={true}
                     name="ID_SEMINAR"
                     value={inputs.ID_SEMINAR || ""}
                     onChange={handleChange}
@@ -229,17 +233,7 @@ export function EditChuyenDe() {
                         size="large"
                         className="bg-primaryColor text-white"
                     >
-                        Tạo
-                    </MyButton>
-                    <MyButton
-                        onClick={() => {
-                            resetInput();
-                        }}
-                        size="large"
-                        variant="underline"
-                        className="text-textColor2 border-textColor3"
-                    >
-                        Huỷ
+                        Xác nhận
                     </MyButton>
                 </div>
             </div>
@@ -437,7 +431,11 @@ export function NewChuyenDe() {
 export function DanhSachChuyenDe() {
     const token = getToken();
     const navigate = useNavigate();
-    const [data, setData] = useState([]);
+    const years = ["2020", "2021", "2022", "2023", "2024", "2025"];
+    const [tableData, setTableData] = useState({ fetchData: [], displayData: [] });
+    const [namBD, setNamBD] = useState("");
+    const [namKT, setNamKT] = useState("");
+    const [giangVienHD, setGiangVienHD] = useState({});
     const { showToast, ToastResponse } = useContext(AdminContext);
     const [searchValue, setSearchValue] = useState("");
     const [filterIsOpen, setFilterIsOpen] = useState(false);
@@ -446,6 +444,7 @@ export function DanhSachChuyenDe() {
     const [currentPage, setCurrentPage] = useState(0);
     const [rowPerPage, setRowPerPage] = useState(5);
     const [selectedRows, setSelectedRows] = useState({ DT01: false, DT02: false });
+    const { data } = useContext(GlobalContext);
     async function handleDelete(id) {
         try {
             const res = await fetch(`/api/admin/seminars/${id}`, {
@@ -460,8 +459,9 @@ export function DanhSachChuyenDe() {
     async function handleGet() {
         try {
             const { res, json } = await getSeminars();
+            console.log(json);
             if (res.ok) {
-                setData(json);
+                setTableData({ fetchData: json, displayData: json });
                 setSelectedRows(Object.fromEntries(json.map((row) => [row.ID_SEMINARS, false])));
             }
         } catch (error) {
@@ -477,13 +477,36 @@ export function DanhSachChuyenDe() {
     function handleChange(e) {
         setSearchValue(e.target.value);
     }
-    function handleSearch() {
-        console.log("searching with value of", searchValue);
+    async function handleSearch() {
+        setCurrentPage(0);
+        const query = {
+            MACB: giangVienHD.MACB,
+            NAM_BD: namBD,
+            NAM_KT: namKT,
+            Search: searchValue,
+        };
+        const { res, json } = await querySeminars(query);
+        setTableData((prev) => ({ ...prev, displayData: json }));
     }
-    function handleFilter() {
+    async function handleFilters() {
+        setCurrentPage(0);
+        const query = {
+            MACB: giangVienHD.MACB,
+            NAM_BD: namBD,
+            NAM_KT: namKT,
+            Search: searchValue,
+        };
+        const { res, json } = await querySeminars(query);
+        setTableData((prev) => ({ ...prev, displayData: json }));
         setFilterIsOpen(false);
     }
-    function resetFilter() {
+    function clearFilters() {
+        setCurrentPage(0);
+        setGiangVienHD({});
+        setSearchValue("");
+        setNamBD("");
+        setNamKT("");
+        setTableData({ displayData: tableData.fetchData, fetchData: tableData.fetchData });
         setFilterIsOpen(false);
     }
     function handleSelectAll(e) {
@@ -581,25 +604,56 @@ export function DanhSachChuyenDe() {
                         size="small"
                         className="bg-successColor justify-center text-textColor1"
                     >
-                        <Link to="new">Thêm đề tài</Link>
+                        <Link to="new">Thêm</Link>
                     </MyButton>
                 </div>
                 <div className={`${filterIsOpen ? "absolute" : "hidden"} mt-2.5 w-full bg-white`}>
-                    <div className="p-5 w-full shadow-md flex gap-2.5">
-                        <MyButton
-                            onClick={handleFilter}
-                            size={"small"}
-                            className="bg-successColor min-w-25"
-                        >
-                            Xác nhận
-                        </MyButton>
-                        <MyButton
-                            onClick={resetFilter}
-                            size={"small"}
-                            className="bg-warningColor min-w-25"
-                        >
-                            Huỷ
-                        </MyButton>
+                    <div className="p-5 w-full shadow-md flex flex-col gap-2.5">
+                        <div className="flex gap-2.5">
+                            <DropDown
+                                align="start"
+                                direction="vertical"
+                                size="auto"
+                                select={namBD}
+                                setSelect={setNamBD}
+                                fieldName="Từ năm"
+                                open={false}
+                                options={years}
+                            ></DropDown>
+                            <DropDown
+                                align="start"
+                                direction="vertical"
+                                size="auto"
+                                select={namKT}
+                                setSelect={setNamKT}
+                                fieldName="Đến năm"
+                                open={false}
+                                options={years}
+                            ></DropDown>
+                            <TextInput
+                                direction="col"
+                                fieldName={"Báo cáo viên"}
+                                users={data.giangVien}
+                                giangVien={giangVienHD}
+                                setGiangVien={setGiangVienHD}
+                            ></TextInput>
+                        </div>
+                        <div className="flex gap-2.5">
+                            <MyButton
+                                onClick={handleFilters}
+                                size={"small"}
+                                className="bg-successColor min-w-25"
+                            >
+                                Xác nhận
+                            </MyButton>
+                            <MyButton
+                                onClick={clearFilters}
+                                size={"small"}
+                                className="bg-warningColor min-w-25"
+                            >
+                                Huỷ
+                            </MyButton>
+                        </div>
                     </div>
                 </div>
                 <div
@@ -639,32 +693,55 @@ export function DanhSachChuyenDe() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {data
-                            .slice(rowPerPage * currentPage, rowPerPage * currentPage + rowPerPage)
-                            .map(({ ID_SEMINAR, TEN_SEMINAR, HO_TEN_USER, NGAYDIENRA_SEMINAR }) => (
-                                <TableRow key={ID_SEMINAR}>
-                                    <TableCell>
-                                        <CheckBox
-                                            onChange={() => {
-                                                handleSelectRows(ID_SEMINAR);
-                                            }}
-                                            checked={selectedRows[ID_SEMINAR]}
-                                        ></CheckBox>
-                                    </TableCell>
-                                    <TableCell className="text-center">{ID_SEMINAR}</TableCell>
-                                    <TableCell className="hover:underline hover:cursor-pointer">
-                                        <Link to={`edit/${ID_SEMINAR}`}>{TEN_SEMINAR}</Link>
-                                    </TableCell>
-                                    <TableCell className="text-center">{HO_TEN_USER}</TableCell>
-                                    <TableCell className="text-center">
-                                        {formatToDisplayDate(new Date(NGAYDIENRA_SEMINAR))}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                        {tableData.displayData.length < 1 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center">
+                                    No result
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            tableData.displayData
+                                .slice(
+                                    rowPerPage * currentPage,
+                                    rowPerPage * currentPage + rowPerPage
+                                )
+                                .map(
+                                    ({
+                                        ID_SEMINAR,
+                                        TEN_SEMINAR,
+                                        BAOCAOVIEN,
+                                        NGAYDIENRA_SEMINAR,
+                                    }) => (
+                                        <TableRow key={ID_SEMINAR}>
+                                            <TableCell>
+                                                <CheckBox
+                                                    onChange={() => {
+                                                        handleSelectRows(ID_SEMINAR);
+                                                    }}
+                                                    checked={selectedRows[ID_SEMINAR]}
+                                                ></CheckBox>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {ID_SEMINAR}
+                                            </TableCell>
+                                            <TableCell className="hover:underline hover:cursor-pointer">
+                                                <Link to={`edit/${ID_SEMINAR}`}>{TEN_SEMINAR}</Link>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {BAOCAOVIEN}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {formatToDisplayDate(new Date(NGAYDIENRA_SEMINAR))}
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                )
+                        )}
                     </TableBody>
                 </Table>
                 <Pagination
-                    numberOfPage={Math.ceil(data.length / rowPerPage)}
+                    numberOfRows={tableData.displayData.length}
+                    numberOfPage={Math.ceil(tableData.displayData.length / rowPerPage)}
                     setCurrentPage={setCurrentPage}
                     select={rowPerPage}
                     setSelect={setRowPerPage}
@@ -674,12 +751,7 @@ export function DanhSachChuyenDe() {
     );
 }
 export function AdminChuyenDe() {
-    const [capDeTai, setCapDeTai] = useState();
-    const [linhVuc, setLinhVuc] = useState();
-    const [DSSinhVien, setDSSinhVien] = useState([]);
-    const [DSCap, setDSCap] = useState([]);
     const [DSGiangVien, setDSGiangVien] = useState([]);
-    const [DSLinhVuc, setDSLinhVuc] = useState([]);
     const {
         ToastMessage,
         ToastSuccess,
@@ -692,14 +764,8 @@ export function AdminChuyenDe() {
 
     useEffect(() => {
         async function getData() {
-            const { cap, DSCap } = await getCap();
-            const { linhvucRes, DSLinhVuc } = await getLinhVuc();
-            const { usersRes, DSUser } = await getUsers();
-            setDSCap(DSCap.map((row) => row.TEN_CAP));
-            setDSLinhVuc(DSLinhVuc.map((row) => row.TEN_LINH_VUC));
-            const sv = SinhVienFromUsers(DSUser);
-            setDSSinhVien(sv);
-            const gv = GiangVienFromUsers(DSUser);
+            const user = await getUsers();
+            const gv = GiangVienFromUsers(user.DSUser);
             setDSGiangVien(gv);
         }
         getData();
@@ -708,13 +774,6 @@ export function AdminChuyenDe() {
     return (
         <ChuyenDeContext.Provider
             value={{
-                capDeTai,
-                setCapDeTai,
-                linhVuc,
-                setLinhVuc,
-                DSCap,
-                DSLinhVuc,
-                DSSinhVien,
                 DSGiangVien,
             }}
         >

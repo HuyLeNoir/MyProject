@@ -1,231 +1,266 @@
 import "../App.css";
-import { useEffect, useState, useRef } from "react";
-import InputGiangVien from "../components/InputGiangVien.jsx";
+import { useEffect, useState, useRef, useContext, Fragment } from "react";
 import Pagination from "../components/Pagination.jsx";
 import DropDown from "../components/Dropdown.jsx";
-import Table from "../components/NormalTable.jsx";
-import Search from "../components/Search.jsx";
-import NavigationBar from "../components/removed/NavBar.jsx";
+import InputGiangVien from "../components/InputGiangVien.jsx";
+import Search from "../components/newSearch.jsx";
+import { formatCurrency, formatToDisplayDate } from "../util/util.js";
+import LabeledText from "../components/LabeledText.jsx";
 import MyButton from "../components/MyButton.jsx";
-import Header from "../components/header.jsx";
+import {
+    Table,
+    TableBody,
+    TableHead,
+    TableCell,
+    TableRow,
+    TableHeadCell,
+} from "../components/Table.jsx";
 import Footer from "../components/Footer.jsx";
+import { HiChevronDown } from "react-icons/hi";
+import { GlobalContext } from "../context/Context.jsx";
+import {
+    getProjects,
+    getSeminars,
+    queryProjects,
+    querySeminars,
+} from "../services/Services_Public.js";
+import { exportDuAnToExcel } from "../util/exportExcel.js";
 
-//TODO: New normal table componenet
-
-function Main({ children }) {
-    return <div className="Wrapper p-4 font-K2D">{children}</div>;
-}
-
-function TableDuAn() {
-    //fetch data lien quan tu csdl
-    const DATA = [
-        {
-            maDuAn: "maDuAn01",
-            tenDuAn: "Tên dự án 1",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp cơ sở",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn02",
-            tenDuAn: "Tên dự án 2",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp bộ",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn03",
-            tenDuAn: "Tên dự án 3",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp nhà nước",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn04",
-            tenDuAn: "Tên dự án abcxyz",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp địa phương",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn05",
-            tenDuAn: "Tên dự án áidákdjákdjákdjaksd",
-            thanhVien: "Thành viên 1 Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp bộ",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2023 - 13/10/2025",
-        },
-        {
-            maDuAn: "maDuAn06",
-            tenDuAn: "Tên dự án 33339999",
-            thanhVien: "Mã Trường Thành Thành viên 2 Thành viên 3 Thành viên 4 Thành viên 5",
-            capDuAn: "Cấp nhà nước",
-            kinhPhi: "1.000.000$",
-            thoiGianThucHien: "13/7/2021 - 13/10/2022",
-        },
-    ];
-    const Theads = [
-        { size: "w-[30%]", fieldName: "Tên dự án" },
-        { size: "w-[30%]", fieldName: "Thành viên tham gia" },
-        { size: "", fieldName: "Kinh phí thực hiện" },
-        { size: "", fieldName: "Cấp dự án" },
-        { size: "", fieldName: "Thời gian thực hiện" },
-    ];
-    const fields = ["maDuAn", "tenDuAn", "thanhVien", "kinhPhi", "capDuAn", "thoiGianThucHien"];
+function Projects() {
     const years = ["2020", "2021", "2022", "2023", "2024", "2025"];
-    const cacCapDuAn = [
-        "Cấp sinh viên",
-        "Cấp cơ sở",
-        "Cấp nghiên cứu sinh",
-        "Cấp địa phương",
-        "Cấp bộ",
-        "Cấp nhà nước",
-    ];
-    const giangVienKHMT = [
-        { Name: "Mã Trường Thành", MSCB: "002937" },
-        { Name: "Võ Trí Thức", MSCB: "002483" },
-        { Name: "Trần Nguyễn Minh Thư", MSCB: "002635" },
-        { Name: "Trần Việt Châu", MSCB: "002692" },
-        { Name: "Phạm Nguyên Khang", MSCB: "001348" },
-        { Name: "Lê Quyết Thắng", MSCB: "000509" },
-        { Name: "Lưu Tiến Đạo", MSCB: "002805" },
-        { Name: "Phạm Xuân Hiền", MSCB: "001707" },
-        { Name: "Trần Nguyễn Dương Chi", MSCB: "002684" },
-        { Name: "Phan Bích Chung", MSCB: "002265" },
-        { Name: "Nguyễn Bá Diệp", MSCB: "002484" },
-        { Name: "Phạm Nguyên Hoàng", MSCB: "002640" },
-        { Name: "Huỳnh Ngọc Thái Anh", MSCB: "002854" },
-    ];
-    //cac state
-
-    const [giangVien, setGiangVien] = useState({ Name: "", MSCB: "" });
-    const [tableData, setTableData] = useState(DATA);
-    const [capDuAn, setCapDuAn] = useState("");
+    const [tableData, setTableData] = useState({ displayData: [], fetchData: [] });
+    //filter
     const [searchValue, setSearchValue] = useState("");
+    const [capDuAn, setCapDuAn] = useState("");
     const [namBD, setNamBD] = useState("");
     const [namKT, setNamKT] = useState("");
-    //cac bien dung trong danh so trang
-    const defaultRowPerPage = 10;
+    const [opens, setOpens] = useState([]);
+    const [giangVien, setGiangVien] = useState({});
     const [currentPage, setCurrentPage] = useState(0);
-    const [NofRowPerPage, setNofRowPerPage] = useState(defaultRowPerPage); //so row hien thi trong 1 table default: 10
-    const totalRows = DATA.length;
-    const currentRows = tableData.length;
-    const NoOfPage = Math.ceil(currentRows / NofRowPerPage);
-    function handleFilters() {
-        let search = searchValue.toLowerCase().trim();
-        let data = DATA.filter(
-            (item) =>
-                (capDuAn === "" || item.capDuAn === capDuAn) &&
-                (giangVien.Name === "" || item.thanhVien.includes(giangVien.Name)) &&
-                (search === "" || item.tenDuAn.toLowerCase().includes(search)) &&
-                (namBD === "" ||
-                    Number(item.thoiGianThucHien.split("-")[0].split("/")[2].trim()) >=
-                        Number(namBD)) &&
-                (namKT === "" ||
-                    Number(item.thoiGianThucHien.split("-")[1].split("/")[2].trim()) <=
-                        Number(namKT))
-        );
-        setTableData(data);
+    //cac bien dung trong danh so trang
+    const [NofRowPerPage, setNofRowPerPage] = useState(10); //so row hien thi trong 1 table default: 10
+    const totalRows = tableData.displayData.length;
+    const NoOfPage = Math.ceil(totalRows / NofRowPerPage);
+    const { data } = useContext(GlobalContext);
+
+    useEffect(() => {
+        async function getData() {
+            const { json } = await getProjects();
+            setTableData({ fetchData: json, displayData: json });
+            setOpens(
+                json.reduce((acc, element) => {
+                    acc[element.ID_PROJECT] = false;
+                    return acc;
+                }, {})
+            );
+        }
+        getData();
+    }, []);
+    useEffect(() => {
+        console.log(tableData);
+    }, [tableData]);
+
+    async function handleFilters() {
+        setCurrentPage(0);
+        const query = {
+            MACB: giangVien.MACB,
+            CAP_PROJECT: capDuAn,
+            NAM_BD: namBD,
+            NAM_KT: namKT,
+            Search: searchValue,
+        };
+        const { res, json } = await queryProjects(query);
+        setTableData((prev) => ({ ...prev, displayData: json }));
     }
     function clearFilters() {
-        setSearchValue("");
+        setCurrentPage(0);
         setCapDuAn("");
+        setGiangVien({});
+        setSearchValue("");
         setNamBD("");
         setNamKT("");
-        setTableData(DATA);
+        setTableData({ fetchData: tableData.fetchData, displayData: tableData.fetchData });
+    }
+    function handleExport() {
+        exportDuAnToExcel(tableData.displayData, "Danh_sach_du_an.xlsx");
+    }
+    if (!tableData) {
+        return <div>loading....</div>;
     }
     return (
-        <>
-            <div className="flex flex-col gap-2.5">
-                <MyButton
-                    size="small"
-                    variant="none"
-                    className="self-end bg-buttonColor text-textColor1"
-                >
-                    Xuất danh sách
-                </MyButton>
-                <div className="flex gap-2.5 tableNavigation">
-                    <DropDown
-                        size="medium"
-                        selected={capDuAn}
-                        setSelected={setCapDuAn}
-                        fieldName="Cấp dự án"
-                        open={false}
-                        options={cacCapDuAn}
-                    ></DropDown>
-                    <InputGiangVien
-                        fieldName={"Giảng viên tham gia"}
-                        users={giangVienKHMT}
-                        giangVien={giangVien}
-                        setGiangVien={setGiangVien}
-                    ></InputGiangVien>
-                    <DropDown
-                        size="auto"
-                        selected={namBD}
-                        setSelected={setNamBD}
-                        fieldName="Từ năm"
-                        open={false}
-                        options={years}
-                    ></DropDown>
-                    <DropDown
-                        size="auto"
-                        selected={namKT}
-                        setSelected={setNamKT}
-                        fieldName="Đến năm"
-                        open={false}
-                        options={years}
-                    ></DropDown>
-                    <Search searchValue={searchValue} setSearchValue={setSearchValue}></Search>
-                </div>
-                <div className="flex gap-2.5">
+        <div className="font-display flex flex-col min-h-[70vh] bg-white">
+            <div className="Wrapper p-4">
+                <div className="flex flex-col gap-2.5">
                     <MyButton
-                        onClick={handleFilters}
+                        onClick={handleExport}
                         size="small"
                         variant="none"
-                        className="bg-successColor text-textColor1"
+                        className="self-end bg-buttonColor text-textColor1"
                     >
-                        Xác Nhận
+                        Xuất danh sách
                     </MyButton>
-                    <MyButton
-                        onClick={clearFilters}
-                        size="small"
-                        variant="none"
-                        className="bg-warningColor text-textColor1"
-                    >
-                        Huỷ
-                    </MyButton>
+                    <div className="flex gap-2.5 tableNavigation">
+                        <DropDown
+                            align="start"
+                            direction="vertical"
+                            size="medium"
+                            select={capDuAn}
+                            setSelect={setCapDuAn}
+                            fieldName="Cấp dự án"
+                            open={false}
+                            options={data.levels}
+                        ></DropDown>
+                        <DropDown
+                            align="start"
+                            direction="vertical"
+                            size="auto"
+                            select={namBD}
+                            setSelect={setNamBD}
+                            fieldName="Từ năm"
+                            open={false}
+                            options={years}
+                        ></DropDown>
+                        <DropDown
+                            align="start"
+                            direction="vertical"
+                            size="auto"
+                            select={namKT}
+                            setSelect={setNamKT}
+                            fieldName="Đến năm"
+                            open={false}
+                            options={years}
+                        ></DropDown>
+                        <InputGiangVien
+                            direction="col"
+                            fieldName={"Báo cáo viên"}
+                            users={data.giangVien}
+                            giangVien={giangVien}
+                            setGiangVien={setGiangVien}
+                        ></InputGiangVien>
+                        <Search self="end" value={searchValue} setValue={setSearchValue}></Search>
+                    </div>
+                    <div className="flex gap-2.5">
+                        <MyButton
+                            onClick={handleFilters}
+                            size="small"
+                            variant="none"
+                            className="bg-successColor text-textColor1"
+                        >
+                            Xác Nhận
+                        </MyButton>
+                        <MyButton
+                            onClick={clearFilters}
+                            size="small"
+                            variant="none"
+                            className="bg-warningColor text-textColor1"
+                        >
+                            Huỷ
+                        </MyButton>
+                    </div>
                 </div>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeadCell className="w-[40%]">Tên dự án</TableHeadCell>
+                            <TableHeadCell className="text-center">
+                                Thành viên tham gia
+                            </TableHeadCell>
+                            <TableHeadCell className="text-center">
+                                Kinh phí thực hiện
+                            </TableHeadCell>
+                            <TableHeadCell className="text-center">Cấp dự án</TableHeadCell>
+                            <TableHeadCell className="text-center">
+                                Thời gian thực hiện
+                            </TableHeadCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {tableData.displayData.length < 1 ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center">
+                                    No result
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            tableData.displayData
+                                .slice(
+                                    currentPage * NofRowPerPage,
+                                    currentPage * NofRowPerPage + NofRowPerPage
+                                )
+                                .map((row) => (
+                                    <Fragment key={row.ID_PROJECT}>
+                                        <TableRow
+                                            className="cursor-pointer hover:bg-gray-50 transition-all duration-300 ease-in-out"
+                                            onClick={() => {
+                                                setOpens((prev) => ({
+                                                    ...prev,
+                                                    [row.ID_PROJECT]: !opens[row.ID_PROJECT],
+                                                }));
+                                            }}
+                                        >
+                                            <TableCell>
+                                                <span className="flex gap-2.5 items-center">
+                                                    <HiChevronDown
+                                                        size={24}
+                                                        className={`flex-shrink-0 inline-block leading-none align-middle transition-all text-textColor2 duration-500 ease-in-out ${
+                                                            opens[row.ID_PROJECT] && "rotate-180"
+                                                        }`}
+                                                    ></HiChevronDown>
+                                                    {row.TEN_PROJECT}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {row.THANHVIEN.split(",")
+                                                    .map((row) => row.split("-")[1])
+                                                    .join(", ")}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {formatCurrency(row.KINHPHI_PROJECT) + " VND"}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {row.CAP_PROJECT}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {formatToDisplayDate(new Date(row.NGAYBD_PROJECT)) +
+                                                    " - " +
+                                                    formatToDisplayDate(
+                                                        new Date(row.NGAYKT_PROJECT)
+                                                    )}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={5}>
+                                                <div
+                                                    className={`${
+                                                        opens[row.ID_PROJECT]
+                                                            ? "max-h-100"
+                                                            : "max-h-0"
+                                                    } px-4 overflow-hidden flex w-full gap-1 flex-col origin-top transition-all duration-500 ease-initial`}
+                                                >
+                                                    <LabeledText label="Mô tả dự án">
+                                                        {row.MOTA_PROJECT}
+                                                    </LabeledText>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    </Fragment>
+                                ))
+                        )}
+                    </TableBody>
+                </Table>
+                <Pagination
+                    direction="vertical"
+                    align="end"
+                    setCurrentPage={setCurrentPage}
+                    numberOfRows={totalRows}
+                    numberOfPage={NoOfPage}
+                    select={NofRowPerPage}
+                    setSelect={setNofRowPerPage}
+                ></Pagination>
             </div>
-            <Table
-                Theads={Theads}
-                fields={fields}
-                currentPage={currentPage}
-                renderAmount={Number(NofRowPerPage)}
-                data={tableData}
-            ></Table>
-            <Pagination
-                setCurrentPage={setCurrentPage}
-                numberOfRows={totalRows}
-                numberOfPage={NoOfPage}
-                selected={NofRowPerPage}
-                setSelected={setNofRowPerPage}
-            ></Pagination>
-        </>
-    );
-}
-function DuAn() {
-    return (
-        <div className="font-display bg-backgroundColor">
-            <Main>
-                <TableDuAn></TableDuAn>
-            </Main>
             <Footer></Footer>
         </div>
     );
 }
 
-export default DuAn;
+export default Projects;

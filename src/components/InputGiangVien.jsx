@@ -1,5 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-export default function TextInput({ fieldName, users, giangVien, setGiangVien, size = "auto" }) {
+export default function TextInput({
+    fieldName,
+    users,
+    giangVien,
+    setGiangVien,
+    size = "auto",
+    direction = "row",
+}) {
     const sizes = {
         small: "min-w-30",
         medium: "min-w-40",
@@ -8,6 +15,7 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
     };
     const [searchResults, setSearchResults] = useState([]);
     const [open, setOpen] = useState(false);
+    const [selected, setSelected] = useState(false);
     const resultRef = useRef();
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -32,8 +40,12 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
         }
         setSearchResults(result);
     }
+    useEffect(() => {
+        setSelected(false);
+    }, [!giangVien.input]);
     function onSelectGiangVien(user) {
         setOpen(false);
+        setSelected(true);
         setGiangVien({
             input: user.MACB + " - " + user.HO_TEN_USER,
             HO_TEN_USER: user.HO_TEN_USER,
@@ -41,14 +53,16 @@ export default function TextInput({ fieldName, users, giangVien, setGiangVien, s
         });
     }
     return (
-        <div className="flex gap-2.5 justify-center items-center">
-            <p>{fieldName}</p>
+        <div className={`${direction !== "row" ? "flex-col" : ""} flex justify-center items-left`}>
+            <p className="p-0.5">{fieldName}</p>
             <div className={`relative ${sizes[size]}`}>
                 <input
                     type="text"
                     onChange={handleUserInput}
                     value={giangVien.input || ""}
-                    className="border-1 border-textColor3 w-full rounded-md px-3 py-1"
+                    className={`border-1 ${
+                        selected ? "border-black" : "border-textColor3"
+                    } focus:shadow-md transition-all outline-0 focus:border-black ease-in-out duration-300 w-full rounded-md px-3 py-1`}
                     placeholder="Nhập tên hoặc MACB"
                 />
                 <div

@@ -7,18 +7,7 @@ import { AdminContext } from "../context/Context.jsx";
 // Simple local TextInput for admin page (avoids importing from Login)
 
 // Placeholder components for other admin subpages
-export function Dashboard() {
-    return <div>Admin Dashboard</div>;
-}
-export function BaiBao() {
-    return <div>Admin Bài Báo</div>;
-}
-export function DuAn() {
-    return <div>Admin Dự Án</div>;
-}
-export function GiangVien() {
-    return <div>Admin Giảng Viên</div>;
-}
+
 function NavItem({ children }) {
     return (
         <span className="flex w-full duration-100 text-h5 transition-all ease-in-out px-2 py-1 gap-2.5 hover:border-r-4 hover:text-primaryColor cursor-pointer border-primaryColor">
@@ -42,14 +31,17 @@ function DropDownMenu() {
             </div>
             <ul
                 className={`content overflow-hidden text-h6 transition-all ease-in-out duration-200 ${
-                    open ? "max-h-20" : "max-h-0"
+                    open ? "max-h-40" : "max-h-0"
                 }`}
             >
-                <li className="px-5 py-1">
+                <li className="px-5 py-1 hover:bg-gray-50 transition-all ease-in-out duration-200 hover:text-ctuColor1">
                     <Link to="danhmuc/cap">Cấp bậc nghiên cứu</Link>
                 </li>
-                <li className="px-5 py-1">
+                <li className="px-5 py-1 hover:bg-gray-50 transition-all ease-in-out duration-200 hover:text-ctuColor1">
                     <Link to="danhmuc/linhvuc">Lĩnh vực nghiên cứu</Link>
+                </li>
+                <li className="px-5 py-1 hover:bg-gray-50 transition-all ease-in-out duration-200 hover:text-ctuColor1">
+                    <Link to="danhmuc/type">Loại bài báo</Link>
                 </li>
             </ul>
         </div>
@@ -107,8 +99,8 @@ export default function Admin() {
     return (
         <div className="text-textColor1 font-display h-screen bg-backgroundColor overflow-x-hidden">
             <Header></Header>
-            <div className="Wrapper grid grid-cols-10 px-10 py-5 gap-5">
-                <nav className="col-span-2 h-full flex bg-white flex-col gap-1">
+            <div className="Wrapper relative grid grid-cols-10 py-5 gap-5">
+                <nav className="col-span-2 flex sticky top-5 bg-white flex-col self-start rounded-lg shadow-md gap-1">
                     <NavItem>
                         <Link to="dashboard">Dashboard</Link>
                     </NavItem>
@@ -123,9 +115,6 @@ export default function Admin() {
                     </NavItem>
                     <NavItem>
                         <Link to="projects">Dự án</Link>
-                    </NavItem>
-                    <NavItem>
-                        <Link to="teachers">Giảng viên</Link>
                     </NavItem>
                     <NavItem>
                         <Link to="users">Người dùng</Link>

@@ -42,7 +42,7 @@ export function TableHeadCell({ children, className = "", ...props }) {
 
 export function TableCell({ children, className = "", ...props }) {
     return (
-        <td className={`${className} px-4 py-4`} {...props}>
+        <td className={`${className} px-3 py-3 text-p`} {...props}>
             {children}
         </td>
     );

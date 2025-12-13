@@ -45,7 +45,6 @@ function Login() {
             const response = await res.json();
             setToastMessage(response.message);
             setToastSuccess(response.success);
-
             if (response.success) {
                 localStorage.setItem("user", JSON.stringify(response.body));
                 console.log(response.body.token);
@@ -106,7 +105,7 @@ function Login() {
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
-                                navigate("/detais");
+                                navigate("/");
                             }}
                             className="px-3 py-2 rounded-md cursor-pointer duration-500 ease-in-out transition-all text-textColor2 border-2 border-ctuColor1 shrink-0 grow-0 self-center"
                         >

@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { HiUserCircle, HiChevronDown } from "react-icons/hi";
 
-export default function DropDown({
+export default function Dropdown({
     direction = "horizontal",
+    align = "",
     className = "",
     defaultValue,
     fieldName,
@@ -43,8 +44,10 @@ export default function DropDown({
     return (
         <div className={className}>
             <div
-                className={`"flex gap-2.5 items-center ${
-                    direction != "horizontal" ? "" : "flex-col"
+                className={`flex  ${
+                    direction != "horizontal"
+                        ? `flex-col ${"items-" + align}`
+                        : "flex-row items-center gap-2.5"
                 }`}
                 ref={dropDownRef}
             >

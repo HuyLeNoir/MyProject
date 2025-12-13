@@ -1,6 +1,13 @@
 import MyButton from "../components/MyButton.jsx";
 import { Datepicker } from "flowbite-react";
-import { getCap, getDeTai, getLinhVuc, getUsers, getDeTaiByID } from "../services/Services.js";
+import {
+    getCap,
+    getDeTai,
+    getLinhVuc,
+    getUsers,
+    getDeTaiByID,
+    queryResearchs,
+} from "../services/Services.js";
 import {
     formatDateLocal,
     SinhVienFromUsers,
@@ -13,7 +20,7 @@ import { HiPlus, HiSearch, HiArrowLeft, HiAdjustments, HiDownload, HiTrash } fro
 import { useEffect, useState, useContext, useCallback } from "react";
 import { Outlet, useParams, Link, useNavigate } from "react-router-dom";
 import { TextWithLabel, OnlyText } from "../components/Form.jsx";
-import { AdminContext } from "../context/Context.jsx";
+import { AdminContext, GlobalContext } from "../context/Context.jsx";
 import Toast from "../components/Toast.jsx";
 import {
     Table,
@@ -23,7 +30,7 @@ import {
     TableHead,
     TableBody,
     CheckBox,
-} from "../components/TableOverhaul.jsx";
+} from "../components/Table.jsx";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "../components/Modal.jsx";
 import DropDown from "../components/Dropdown.jsx";
 import TextInput from "../components/InputGiangVien.jsx";
@@ -193,7 +200,7 @@ export function EditDeTai() {
                         <HiArrowLeft size={32}></HiArrowLeft>
                     </Link>
                 </MyButton>
-                <h1 className="text-h2 font-semibold my-2.5">Thêm một đề tài mới</h1>
+                <h1 className="text-h2 font-semibold my-2.5">Chỉnh sửa đề tài {id}</h1>
             </div>
             <div className="relative bg-white p-5 shadow-md border-1 flex flex-col items-start gap-2.5 border-gray-200">
                 <TextWithLabel
@@ -689,11 +696,14 @@ export function NewDeTai() {
     );
 }
 export function DanhSachDeTai() {
-    const token = getToken();
     const navigate = useNavigate();
-    const [data, setData] = useState([]);
-    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc, DSCap, DSLinhVuc } =
-        useContext(DeTaiContext);
+    const token = getToken();
+    const [tableData, setTableData] = useState({ fetchData: [], displayData: [] });
+    const { capDeTai, setCapDeTai, linhVuc, setLinhVuc } = useContext(DeTaiContext);
+    const years = ["2020", "2021", "2022", "2023", "2024", "2025"];
+    const [namBD, setNamBD] = useState("");
+    const [namKT, setNamKT] = useState("");
+    const [giangVienHD, setGiangVienHD] = useState({});
     const { showToast, ToastResponse } = useContext(AdminContext);
     const [searchValue, setSearchValue] = useState("");
     const [filterIsOpen, setFilterIsOpen] = useState(false);
@@ -701,7 +711,9 @@ export function DanhSachDeTai() {
     //paginatioon
     const [currentPage, setCurrentPage] = useState(0);
     const [rowPerPage, setRowPerPage] = useState(5);
+    const numberOfPage = Math.ceil(tableData.displayData.length / rowPerPage);
     const [selectedRows, setSelectedRows] = useState({ DT01: false, DT02: false });
+    const { data } = useContext(GlobalContext);
     useEffect(() => {
         console.log(data);
     }, [data]);
@@ -721,7 +733,7 @@ export function DanhSachDeTai() {
         try {
             const { getDeTaiRes, DSDeTai } = await getDeTai();
             if (getDeTaiRes.ok) {
-                setData(DSDeTai);
+                setTableData({ displayData: DSDeTai, fetchData: DSDeTai });
                 setSelectedRows(Object.fromEntries(DSDeTai.map((row) => [row.ID_DETAI, false])));
             }
         } catch (error) {
@@ -732,23 +744,50 @@ export function DanhSachDeTai() {
         }
     }
     useEffect(() => {
-        async function get() {
-            await handleGet();
-        }
-        get();
+        handleGet();
     }, []);
     function handleChange(e) {
         setSearchValue(e.target.value);
     }
-    function handleSearch() {
-        console.log("searching with value of", searchValue);
+    async function handleSearch() {
+        setCurrentPage(0);
+
+        const query = {
+            MACB: giangVienHD.MACB || null,
+            TEN_LINH_VUC: linhVuc || null,
+            TEN_CAP: capDeTai || null,
+            NAM_BD: namBD,
+            NAM_KT: namKT,
+            Search: searchValue || null,
+        };
+        const { res, json } = await queryResearchs(query);
+        console.log(json);
+        setTableData((prev) => ({ ...prev, displayData: json }));
+        setSearchValue("");
     }
-    function handleFilter() {
+    async function handleFilters() {
+        setCurrentPage(0);
+        const query = {
+            MACB: giangVienHD.MACB || null,
+            TEN_LINH_VUC: linhVuc || null,
+            TEN_CAP: capDeTai || null,
+            NAM_BD: namBD,
+            NAM_KT: namKT,
+            Search: searchValue || null,
+        };
+        const { res, json } = await queryResearchs(query);
+        console.log(json);
+        setTableData((prev) => ({ ...prev, displayData: json }));
         setFilterIsOpen(false);
     }
-    function resetFilter() {
-        setCapDeTai();
-        setLinhVuc();
+    function clearFilters() {
+        setCurrentPage(0);
+        setCapDeTai("");
+        setLinhVuc("");
+        setNamBD("");
+        setNamKT("");
+        setGiangVienHD({});
+        setTableData((prev) => ({ ...prev, displayData: tableData.fetchData }));
         setFilterIsOpen(false);
     }
     function handleSelectAll(e) {
@@ -847,41 +886,78 @@ export function DanhSachDeTai() {
                         size="small"
                         className="bg-successColor justify-center text-textColor1"
                     >
-                        <Link to="new">Thêm đề tài</Link>
+                        <Link to="new">Thêm</Link>
                     </MyButton>
                 </div>
                 <div className={`${filterIsOpen ? "absolute" : "hidden"} mt-2.5 w-full bg-white`}>
-                    <div className="p-5 w-full shadow-md flex gap-2.5">
-                        <DropDown
-                            size="medium"
-                            className="min-w-40"
-                            select={capDeTai}
-                            setSelect={setCapDeTai}
-                            fieldName={"Cấp đề tài"}
-                            options={DSCap}
-                        ></DropDown>
-                        <DropDown
-                            size="medium"
-                            className="min-w-40"
-                            select={linhVuc}
-                            setSelect={setLinhVuc}
-                            options={DSLinhVuc}
-                            fieldName={"Lĩnh vực đề tài"}
-                        ></DropDown>
-                        <MyButton
-                            onClick={handleFilter}
-                            size={"small"}
-                            className="bg-successColor min-w-25"
-                        >
-                            Xác nhận
-                        </MyButton>
-                        <MyButton
-                            onClick={resetFilter}
-                            size={"small"}
-                            className="bg-warningColor min-w-25"
-                        >
-                            Huỷ
-                        </MyButton>
+                    <div className="p-5 w-full shadow-md flex flex-col gap-2.5">
+                        <div className="flex gap-2.5">
+                            <DropDown
+                                align="start"
+                                direction="vertical"
+                                select={linhVuc}
+                                setSelect={setLinhVuc}
+                                fieldName="Lĩnh vực"
+                                open={false}
+                                size="medium"
+                                options={data.fields}
+                            ></DropDown>
+                            <DropDown
+                                align="start"
+                                direction="vertical"
+                                size="medium"
+                                select={capDeTai}
+                                setSelect={setCapDeTai}
+                                fieldName="Cấp đề tài"
+                                open={false}
+                                options={data.levels}
+                            ></DropDown>
+                            <DropDown
+                                align="start"
+                                direction="vertical"
+                                size="auto"
+                                select={namBD}
+                                setSelect={setNamBD}
+                                fieldName="Từ năm"
+                                open={false}
+                                options={years}
+                            ></DropDown>
+                            <DropDown
+                                align="start"
+                                direction="vertical"
+                                size="auto"
+                                select={namKT}
+                                setSelect={setNamKT}
+                                fieldName="Đến năm"
+                                open={false}
+                                options={years}
+                            ></DropDown>
+                            <TextInput
+                                direction="col"
+                                fieldName={"Giảng Viên Hướng Dẫn"}
+                                users={data.giangVien}
+                                giangVien={giangVienHD}
+                                setGiangVien={setGiangVienHD}
+                            ></TextInput>
+                        </div>
+                        <div className="flex gap-2.5">
+                            <MyButton
+                                onClick={handleFilters}
+                                size="small"
+                                variant="none"
+                                className="bg-successColor text-textColor1"
+                            >
+                                Xác Nhận
+                            </MyButton>
+                            <MyButton
+                                onClick={clearFilters}
+                                size="small"
+                                variant="none"
+                                className="bg-warningColor text-textColor1"
+                            >
+                                Huỷ
+                            </MyButton>
+                        </div>
                     </div>
                 </div>
                 <div
@@ -917,27 +993,44 @@ export function DanhSachDeTai() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {data.map(({ ID_DETAI, TEN_DETAI, TEN_CAP, TEN_LINH_VUC }) => (
-                            <TableRow key={ID_DETAI}>
-                                <TableCell>
-                                    <CheckBox
-                                        onChange={() => {
-                                            handleSelectRows(ID_DETAI);
-                                        }}
-                                        checked={selectedRows[ID_DETAI]}
-                                    ></CheckBox>
+                        {tableData.displayData.length < 1 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center">
+                                    No result
                                 </TableCell>
-                                <TableCell className="text-center">{ID_DETAI}</TableCell>
-                                <TableCell className="hover:underline hover:cursor-pointer">
-                                    <Link to={`edit/${ID_DETAI}`}>{TEN_DETAI}</Link>
-                                </TableCell>
-                                <TableCell className="text-center">{TEN_CAP}</TableCell>
-                                <TableCell className="text-center">{TEN_LINH_VUC}</TableCell>
                             </TableRow>
-                        ))}
+                        ) : (
+                            tableData.displayData
+                                .slice(
+                                    currentPage * rowPerPage,
+                                    currentPage * rowPerPage + rowPerPage
+                                )
+                                .map(({ ID_DETAI, TEN_DETAI, TEN_CAP, TEN_LINH_VUC }) => (
+                                    <TableRow key={ID_DETAI}>
+                                        <TableCell>
+                                            <CheckBox
+                                                onChange={() => {
+                                                    handleSelectRows(ID_DETAI);
+                                                }}
+                                                checked={selectedRows[ID_DETAI]}
+                                            ></CheckBox>
+                                        </TableCell>
+                                        <TableCell className="text-center">{ID_DETAI}</TableCell>
+                                        <TableCell className="hover:underline hover:cursor-pointer">
+                                            <Link to={`edit/${ID_DETAI}`}>{TEN_DETAI}</Link>
+                                        </TableCell>
+                                        <TableCell className="text-center">{TEN_CAP}</TableCell>
+                                        <TableCell className="text-center">
+                                            {TEN_LINH_VUC}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                        )}
                     </TableBody>
                 </Table>
                 <Pagination
+                    numberOfRows={tableData.displayData.length}
+                    numberOfPage={numberOfPage}
                     setCurrentPage={setCurrentPage}
                     select={rowPerPage}
                     setSelect={setRowPerPage}

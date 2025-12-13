@@ -8,6 +8,14 @@ export function formatToDisplayDate(date) {
     const pad = (n) => String(n).padStart(2, "0");
     return [pad(date.getDate()), pad(date.getMonth() + 1), date.getFullYear()].join("/");
 }
+export function formatDisplayDateToSQLDate(dateString) {
+    if (dateString) {
+        const pad = (n) => String(n).padStart(2, "0");
+        const date = dateString.split("/");
+        return [pad(date[2]), pad(date[1]), pad(date[0])].join("-");
+    }
+    return null;
+}
 export function currencyStringToNunber(str) {
     if (!str) {
         return;
@@ -17,13 +25,13 @@ export function currencyStringToNunber(str) {
 export function formatCurrency(value) {
     if (!value) {
         return;
-    }
-    if (typeof value == Number) {
+    } else if (typeof value == "number") {
         return value.toLocaleString("vi-VN");
+    } else {
+        const temp = Number(value.replace(/\./g, ""));
+        return temp.toLocaleString("vi-VN");
     }
     //value -> number
-    const temp = Number(value.replace(/\./g, ""));
-    return temp.toLocaleString("vi-VN");
 }
 export function getCurrentUser() {
     try {
@@ -63,5 +71,19 @@ export function GiangVienFromUsers(dbResult) {
             USERID: row.USERID,
             HO_TEN_USER: row.HO_TEN_USER,
             MACB: row.MACB,
+            HOC_VAN: row.HOC_VAN,
+            EMAIL: row.EMAIL,
+            SDT: row.SDT,
         }));
+}
+export function randInt(min, max) {
+    return Math.random() * (max - min) + min;
+}
+export function getDataByPeriod(data, timePeriod) {
+    //only works with data whcih have year as a key
+    const thisYear = new Date().getFullYear();
+    const filteredData = Object.entries(data).filter(
+        ([key, value]) => key >= thisYear - timePeriod + 1
+    );
+    return Object.fromEntries(filteredData);
 }
